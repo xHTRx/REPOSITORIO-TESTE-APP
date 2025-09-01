@@ -1,45 +1,41 @@
 package com.example.myapplication.uiprojeto
 
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.MyApplicationTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
-
-
-//class TelaQr : ComponentActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-//        setContent {
-//            MyApplicationTheme {
-//                Telaqr()
-//            }
-//        }
-//    }
-//}
-
+import kotlinx.coroutines.delay
 
 @Preview(showBackground = true)
 @Composable
-fun TelaQr() {
+fun Telaqr() {
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -50,56 +46,16 @@ fun TelaQr() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Cabecalho()
-            SecaoCentral(modifier = Modifier.weight(1f))
-            Rodape()
+            val context = LocalContext.current
+            Cabecalho(titulo= "QR Code")
+            SecaoCentralqr(modifier = Modifier.weight(1f))
+            Rodape(context = context)
         }
     }
 }
 
-
 @Composable
-fun Cabecalho() {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.Blue),
-        modifier = Modifier
-            .height(70.dp)
-            .fillMaxWidth(),
-        shape = RectangleShape
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(26.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.iconecabecalho),
-                contentDescription = "Imagem de Perfil",
-                modifier = Modifier.size(50.dp)
-            )
-
-
-            Spacer(modifier = Modifier.width(60.dp))
-
-
-            Column {
-                Text(
-                    "QR Code",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White
-                )
-            }
-
-
-        }
-    }
-}
-
-
-@Composable
-fun SecaoCentral(modifier: Modifier = Modifier) {
+fun SecaoCentralqr(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -112,83 +68,44 @@ fun SecaoCentral(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.headlineLarge,
         )
         Spacer(modifier = Modifier.height(40.dp))
-        Box(
-            modifier = Modifier
-                .size(350.dp)
-                .border(BorderStroke(8.dp, Color.Red), RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.myqrcode),
-                contentDescription = "Logo da aplicação",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(8.dp))
-            )
-        }
-//        Spacer(modifier = Modifier.height(140.dp))
-//        Box(
-//            modifier = Modifier
-//                .width(350.dp)
-//                .height(100.dp)
-//                .border(BorderStroke(8.dp, Color.Red), RoundedCornerShape(8.dp)),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.myqrcode),
-//                contentDescription = "Logo da aplicação",
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .clip(RoundedCornerShape(8.dp))
-//            )
-//        }
+        DynamicQrCodeImage() // Chamando o novo Composable
     }
 }
-
 
 @Composable
-fun Rodape() {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier
-            .height(100.dp)
-            .fillMaxWidth(),
-        shape = RectangleShape
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.casalogo),
-                    contentDescription = "Ícone de celular",
-                    modifier = Modifier.size(100.dp)
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.celularicone),
-                    contentDescription = "Ícone de QR Code",
-                    modifier = Modifier.size(100.dp)
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.ofertasicone),
-                    contentDescription = "Ícone de presente",
-                    modifier = Modifier.size(110.dp)
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.qrcodeicone),
-                    contentDescription = "Ícone de QR Code",
-                    modifier = Modifier.size(80.dp)
-                )
-            }
+fun DynamicQrCodeImage() {
+    val qrCodeImages = listOf(
+        R.drawable.myqrcode,
+        R.drawable.myqrcode2,
+        R.drawable.myqrcode3,
+    )
+
+    // 2. Variável de estado para armazenar o índice da imagem atual
+    var currentImageIndex by remember { mutableStateOf(0) }
+
+    // 3. LaunchedEffect para criar um temporizador que atualiza o índice
+    LaunchedEffect(key1 = Unit) {
+        while (true) {
+            // Espera 10 segundos
+            delay(10000L)
+            // Atualiza o índice para o próximo, usando o operador de módulo (%) para voltar ao início da lista
+            currentImageIndex = (currentImageIndex + 1) % qrCodeImages.size
         }
     }
+
+    // 4. Interface que usa a variável de estado
+    Box(
+        modifier = Modifier
+            .size(350.dp)
+            .border(BorderStroke(8.dp, Color.Red), RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = qrCodeImages[currentImageIndex]),
+            contentDescription = "QR Code Dinâmico",
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(8.dp))
+        )
+    }
 }
-
-
-
-
-
