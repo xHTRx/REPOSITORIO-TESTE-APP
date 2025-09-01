@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.uiprojeto.telasactivity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.uiprojeto.TelaHome
 
-
-class MainActivity : ComponentActivity() {
+class TelahomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
