@@ -76,7 +76,7 @@ fun TelaOfertas() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecaoCentralO() {
-    // --- Dados para os itens de cashback (AGORA COM MAIS ITENS) ---
+    // Dados para os itens de cashback
     val cashbackItems = listOf(
         CashbackItemData("11%", "de cashback", R.drawable.vivara),
         CashbackItemData("10%", "de cashback", R.drawable.life),
@@ -88,7 +88,7 @@ fun SecaoCentralO() {
     )
 
 
-    // --- Dados para os cards de produto ---
+    // Dados para os cards de produto
     val productItems = listOf(
         ProductItemData(
             "Smartphone Motorola Moto G05",
@@ -116,7 +116,7 @@ fun SecaoCentralO() {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // --- Barra de Pesquisa ---
+        // --- Barra de Pesquisa
         OutlinedTextField(
             value = "",
             onValueChange = {},
@@ -154,9 +154,9 @@ fun SecaoCentralO() {
         Spacer(modifier = Modifier.height(24.dp))
 
 
-        // --- Seção "Inter Shop indica!" ---
+
         Text(
-            text = "Inter Shop indica! ❤️",
+            text = "Julius Shop indica! ❤️",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -176,7 +176,7 @@ fun SecaoCentralO() {
         Spacer(modifier = Modifier.height(24.dp))
 
 
-        // --- Botão "Mostrar mais" ---
+        // Botão "Mostrar mais"
         Button(
             onClick = { /* Ação do botão */ },
             modifier = Modifier
@@ -220,7 +220,6 @@ fun SecaoCentralO() {
 }
 
 
-// O restante das funções CashbackItem e ProductCard permanecem as mesmas.
 @Composable
 fun CashbackItem(data: CashbackItemData) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {

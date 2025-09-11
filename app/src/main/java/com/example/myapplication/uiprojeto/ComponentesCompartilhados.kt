@@ -32,9 +32,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 import android.content.Context
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.example.myapplication.uiprojeto.telasactivity.TelahomeActivity
 import com.example.myapplication.uiprojeto.telasactivity.TelaqrActivity
 import com.example.myapplication.uiprojeto.telasactivity.TelaofertasActivity
+import com.example.myapplication.uiprojeto.telasactivity.TelacarteirinhaActivity
 
 
 
@@ -108,6 +111,10 @@ fun Rodape(context: Context) {
                     painter = painterResource(id = R.drawable.celularicone),
                     contentDescription = "Ícone de celular",
                     modifier = Modifier.size(100.dp)
+                        .clickable {
+                            val intent = Intent(context, TelacarteirinhaActivity::class.java)
+                            context.startActivity(intent)
+                        }
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ofertasicone),

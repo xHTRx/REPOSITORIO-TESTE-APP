@@ -29,6 +29,12 @@
             android:theme="@style/Theme.MyApplication" />
 
         <activity
+            android:name=".uiprojeto.telasactivity.TelacarteirinhaActivity"
+            android:exported="false"
+            android:label="Carteirinha"
+            android:theme="@style/Theme.MyApplication" />
+
+        <activity
             android:name=".uiprojeto.telasactivity.TelahomeActivity"
             android:exported="false"
             android:label="Home"

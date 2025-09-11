@@ -38,6 +38,9 @@ import kotlinx.coroutines.delay
 fun Telaqr() {
     Scaffold(
         modifier = Modifier.fillMaxSize()
+
+
+        
     ) { innerPadding ->
         Column(
             modifier = Modifier
