@@ -48,7 +48,8 @@ data class ProductItemData(
     val title: String,
     val originalPrice: String,
     val currentPrice: String,
-    val imageResId: Int
+    val imageResId: Int,
+    val url: String
 )
 
 
@@ -110,22 +111,26 @@ fun SecaoCentralO() {
     // Dados para os cards de produto
     val productItems = listOf(
         ProductItemData(
-            "Smartphone Motorola Moto G05",
+            "Curso de Finances com Julius",
             "R$ 1.099,00",
             "R$ 599,00 à vista",
-            R.drawable.julius
+            R.drawable.julius,
+            "https://www.ev.org.br/trilhas-de-conhecimento/financas"
         ),
         ProductItemData(
-            "Sanduicheira Elétrica Cadence Click",
+            "E-Book de Economia Avançado - Julius",
             "R$ 159,90",
             "R$ 91,90 à vista",
-            R.drawable.economia
+            R.drawable.economia,
+            "https://www.amazon.com.br/Economia-Avan%C3%A7ada-Tomislav-R-Femenick/dp/6556058149?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&psc=1&smid=A1ZZFT5FULY4LN"
+
         ),
         ProductItemData(
-            "Outro Produto",
+            "Uniforme Julius",
             "R$ 200,00",
             "R$ 150,00",
-            R.drawable.unifrome
+            R.drawable.unifrome,
+            "https://www.amazon.com.br/Fantasia-Macac%C3%A3o-Julius-Mundo-Cosplay/dp/B0C1HBQ6TM"
         )
     )
 
@@ -250,12 +255,6 @@ fun SecaoCentralO() {
 
 
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Ofertas no precinho!",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
     }
 }
 
@@ -292,10 +291,17 @@ fun CashbackItem(data: CashbackItemData) {
 
 @Composable
 fun ProductCard(data: ProductItemData) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .width(180.dp)
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable {
+                // Ação: Abrir o link no navegador
+                val intent = Intent(Intent.ACTION_VIEW, data.url.toUri())
+            context.startActivity(intent)
+         },
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
