@@ -4,9 +4,35 @@ package com.example.myapplication.uiprojeto
 
 
 import android.content.Intent
-import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,26 +40,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.myapplication.R
 import androidx.core.net.toUri
 
 
-
-
-// --- Novas classes de dados para os itens ---
 data class CashbackItemData(
     val percentage: String,
     val description: String,
@@ -55,6 +68,7 @@ data class ProductItemData(
 
 
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Preview(showBackground = true)
 @Composable
 fun TelaOfertas() {
@@ -88,13 +102,17 @@ fun TelaOfertas() {
     }
 }
 
+annotation class Preview(val showBackground: Boolean)
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun SecaoCentralO() {
-    // Dados para os itens de cashback
+    // Variáveis de estado para o texto do campo de busca e o histórico
+    var searchText by remember { mutableStateOf("") }
+    val recentSearches = remember { mutableStateListOf<String>() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val cashbackItems = listOf(
         CashbackItemData("11%", "de cashback", R.drawable.vivara, "https://www.vivara.com.br"),
         CashbackItemData("10%", "de cashback", R.drawable.life, "https://www.vivara.com.br"),
@@ -104,11 +122,6 @@ fun SecaoCentralO() {
         CashbackItemData("8%", "de cashback", R.drawable.dolce, "https://www.dolcegusto.com.br"),
         CashbackItemData("20%", "de cashback", R.drawable.fotoregistro, "https://www.fotoregistro.com.br")
     )
-
-
-
-
-    // Dados para os cards de produto
     val productItems = listOf(
         ProductItemData(
             "Curso de Finances com Julius",
@@ -123,7 +136,6 @@ fun SecaoCentralO() {
             "R$ 91,90 à vista",
             R.drawable.economia,
             "https://www.amazon.com.br/Economia-Avan%C3%A7ada-Tomislav-R-Femenick/dp/6556058149?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&psc=1&smid=A1ZZFT5FULY4LN"
-
         ),
         ProductItemData(
             "Uniforme Julius",
@@ -134,18 +146,15 @@ fun SecaoCentralO() {
         )
     )
 
-
-
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // --- Barra de Pesquisa
+        // Barra de Pesquisa funcional
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
+            value = searchText,
+            onValueChange = { searchText = it },
             label = { Text("O que você procura?") },
             leadingIcon = {
                 Icon(
@@ -157,16 +166,52 @@ fun SecaoCentralO() {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Gray,
                 unfocusedBorderColor = Color.LightGray
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    if (searchText.isNotBlank()) {
+                        if (!recentSearches.contains(searchText)) {
+                            recentSearches.add(0, searchText)
+                        }
+                        if (recentSearches.size > 5) {
+                            recentSearches.removeLast()
+                        }
+                        searchText = ""
+                        keyboardController?.hide()
+                    }
+                }
             )
         )
 
-
-
+        // Seção para mostrar as pesquisas recentes
+        if (recentSearches.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Pesquisas Recentes",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            LazyColumn(
+                modifier = Modifier.height(100.dp)
+            ) {
+                items(recentSearches) { searchItem ->
+                    Text(
+                        text = searchItem,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                searchText = searchItem
+                            }
+                            .padding(vertical = 4.dp),
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-
-
 
         // --- Carrossel de Cashback ---
         Row(
@@ -180,15 +225,7 @@ fun SecaoCentralO() {
             }
         }
 
-
-
-
         Spacer(modifier = Modifier.height(24.dp))
-
-
-
-
-
 
         Text(
             text = "Julius Shop indica! ❤️",
@@ -207,15 +244,8 @@ fun SecaoCentralO() {
             }
         }
 
-
-
-
         Spacer(modifier = Modifier.height(24.dp))
 
-
-
-
-        // Botão "Mostrar mais"
         Button(
             onClick = { /* Ação do botão */ },
             modifier = Modifier
@@ -226,15 +256,8 @@ fun SecaoCentralO() {
             Text(text = "Mostrar mais", color = Color.White)
         }
 
-
-
-
         Spacer(modifier = Modifier.height(24.dp))
 
-
-
-
-        // --- Seção de Banner de Ofertas Especiais ---
         Text(
             text = "Ofertas Especiais",
             fontSize = 20.sp,
@@ -251,15 +274,9 @@ fun SecaoCentralO() {
             contentScale = ContentScale.Crop
         )
 
-
-
-
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
-
-
-
 
 @Composable
 fun CashbackItem(data: CashbackItemData) {

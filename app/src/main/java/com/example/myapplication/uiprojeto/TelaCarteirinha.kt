@@ -38,13 +38,23 @@ fun TelaCarteirinha() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .heightIn(max = 550.dp)
+                    .padding(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.medium,
+                shadowElevation = 8.dp
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.carteira),
                     contentDescription = "Carteirinha Universitária",
                     modifier = Modifier
-                        .size(550.dp)
+                        .fillMaxSize()
                 )
+            }
         }
     }
 }
-
