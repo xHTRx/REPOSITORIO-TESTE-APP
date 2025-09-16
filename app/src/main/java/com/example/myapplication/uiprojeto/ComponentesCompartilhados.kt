@@ -42,11 +42,11 @@ import com.example.myapplication.uiprojeto.telasactivity.TelacarteirinhaActivity
 
 
 @Composable
-fun Cabecalho(titulo: String) {
+fun Cabecalho(titulo: String, mostrarIconeDeRosto: Boolean) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Blue),
         modifier = Modifier
-            .height(70.dp)
+            .height(110.dp)
             .fillMaxWidth(),
         shape = RectangleShape
     ) {
@@ -69,17 +69,18 @@ fun Cabecalho(titulo: String) {
                     color = Color.White
                 )
             }
-            Spacer(modifier = Modifier.width(80.dp))
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = "Ícone de Perfil",
-                modifier = Modifier.size(50.dp),
-                tint = Color.White
-            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (mostrarIconeDeRosto) {
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Ícone de Perfil",
+                    modifier = Modifier.size(50.dp),
+                    tint = Color.White
+                )
+            }
         }
     }
 }
-
 
 @Composable
 fun Rodape(context: Context) {

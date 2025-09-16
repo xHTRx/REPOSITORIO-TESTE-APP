@@ -36,11 +36,19 @@ import kotlinx.coroutines.delay
 @Preview(showBackground = true)
 @Composable
 fun Telaqr() {
+    val context = LocalContext.current
     Scaffold(
-        modifier = Modifier.fillMaxSize()
-
-
-        
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            Box(modifier = Modifier.padding(top = 0.dp)) {
+                Cabecalho(titulo= "QR Code", mostrarIconeDeRosto = false)
+            }
+        },
+        bottomBar = {
+            Box(modifier = Modifier.padding(bottom = 25.dp)) {
+                Rodape(context = context)
+            }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -49,10 +57,7 @@ fun Telaqr() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val context = LocalContext.current
-            Cabecalho(titulo= "QR Code")
             SecaoCentralqr(modifier = Modifier.weight(1f))
-            Rodape(context = context)
         }
     }
 }
@@ -71,7 +76,7 @@ fun SecaoCentralqr(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.headlineLarge,
         )
         Spacer(modifier = Modifier.height(40.dp))
-        DynamicQrCodeImage() // Chamando o novo Composable
+        DynamicQrCodeImage()
     }
 }
 
@@ -83,20 +88,15 @@ fun DynamicQrCodeImage() {
         R.drawable.myqrcode3,
     )
 
-    // 2. Variável de estado para armazenar o índice da imagem atual
     var currentImageIndex by remember { mutableStateOf(0) }
 
-    // 3. LaunchedEffect para criar um temporizador que atualiza o índice
     LaunchedEffect(key1 = Unit) {
         while (true) {
-            // Espera 10 segundos
             delay(10000L)
-            // Atualiza o índice para o próximo, usando o operador de módulo (%) para voltar ao início da lista
             currentImageIndex = (currentImageIndex + 1) % qrCodeImages.size
         }
     }
 
-    // 4. Interface que usa a variável de estado
     Box(
         modifier = Modifier
             .size(350.dp)

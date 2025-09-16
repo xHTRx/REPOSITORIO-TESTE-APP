@@ -13,14 +13,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun TelaHome() {
+    val context = LocalContext.current
     Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            Box(modifier = Modifier.padding(top = 0.dp)) {
+                Cabecalho(titulo = "Home", mostrarIconeDeRosto = true)
+            }
+        },
+        bottomBar = {
+            Box(modifier = Modifier.padding(bottom = 25.dp)) {
+                Rodape(context = context)
+            }
+        },
+
+        ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -28,10 +38,7 @@ fun TelaHome() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val context = LocalContext.current
-            Cabecalho(titulo = "Carteirinha")
             SecaoCentralH()
-            Rodape(context = context)
         }
     }
 }
@@ -44,13 +51,15 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(modifier = Modifier.height(50.dp))
         Image(
             painter = painterResource(id = R.drawable.logoup),
             contentDescription = "Logo da aplicação",
             modifier = Modifier
-                .width(1700.dp)
-                .height(200.dp)
+                .fillMaxWidth() // A imagem preenche a largura disponível
+                .heightIn(max = 350.dp) // Define uma altura máxima para a imagem
         )
+        Spacer(modifier = Modifier.height(100.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,

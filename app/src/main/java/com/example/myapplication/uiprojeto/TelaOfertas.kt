@@ -48,8 +48,8 @@ fun TelaOfertas() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Box(modifier = Modifier.padding(top = 25.dp)) {
-                Cabecalho(titulo = "Benefícios e Ofertas")
+            Box(modifier = Modifier.padding(top = 0.dp)) {
+                Cabecalho(titulo = "Benefícios e Ofertas", mostrarIconeDeRosto = false)
             }
         },
         bottomBar = {
