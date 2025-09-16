@@ -1,7 +1,12 @@
 package com.example.myapplication.uiprojeto
 
 
+
+
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,14 +28,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
+import androidx.core.net.toUri
+
+
 
 
 // --- Novas classes de dados para os itens ---
 data class CashbackItemData(
     val percentage: String,
     val description: String,
-    val imageResId: Int
+    val imageResId: Int,
+    val url: String // Adicionamos este campo para armazenar o link
 )
+
+
 
 
 data class ProductItemData(
@@ -41,6 +52,8 @@ data class ProductItemData(
 )
 
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun TelaOfertas() {
@@ -48,8 +61,8 @@ fun TelaOfertas() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Box(modifier = Modifier.padding(top = 0.dp)) {
-                Cabecalho(titulo = "Benefícios e Ofertas", mostrarIconeDeRosto = false)
+            Box(modifier = Modifier.padding(top = 25.dp)) {
+                Cabecalho(titulo = "Benefícios e Ofertas" ,mostrarIconeDeRosto = false)
             }
         },
         bottomBar = {
@@ -57,6 +70,8 @@ fun TelaOfertas() {
                 Rodape(context = context)
             }
         },
+
+
 
 
         ) { innerPadding ->
@@ -73,19 +88,23 @@ fun TelaOfertas() {
 }
 
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecaoCentralO() {
     // Dados para os itens de cashback
     val cashbackItems = listOf(
-        CashbackItemData("11%", "de cashback", R.drawable.vivara),
-        CashbackItemData("10%", "de cashback", R.drawable.life),
-        CashbackItemData("9%", "de cashback", R.drawable.kipling),
-        CashbackItemData("12%", "de cashback", R.drawable.lor),
-        CashbackItemData("15%", "de cashback", R.drawable.evino),
-        CashbackItemData("8%", "de cashback", R.drawable.dolce),
-        CashbackItemData("20%", "de cashback", R.drawable.fotoregistro)
+        CashbackItemData("11%", "de cashback", R.drawable.vivara, "https://www.vivara.com.br"),
+        CashbackItemData("10%", "de cashback", R.drawable.life, "https://www.vivara.com.br"),
+        CashbackItemData("9%", "de cashback", R.drawable.kipling, "https://www.kipling.com.br"),
+        CashbackItemData("12%", "de cashback", R.drawable.lor, "https://www.cafelor.com.br/?srsltid=AfmBOooO4eiVk2EyPlSrVAD6m01KlqVUnotNRGpYB6Ts_c5Z4hCf5iZe"),
+        CashbackItemData("15%", "de cashback", R.drawable.evino, "https://www.evino.com.br"),
+        CashbackItemData("8%", "de cashback", R.drawable.dolce, "https://www.dolcegusto.com.br"),
+        CashbackItemData("20%", "de cashback", R.drawable.fotoregistro, "https://www.fotoregistro.com.br")
     )
+
+
 
 
     // Dados para os cards de produto
@@ -109,6 +128,8 @@ fun SecaoCentralO() {
             R.drawable.unifrome
         )
     )
+
+
 
 
     Column(
@@ -135,7 +156,11 @@ fun SecaoCentralO() {
         )
 
 
+
+
         Spacer(modifier = Modifier.height(16.dp))
+
+
 
 
         // --- Carrossel de Cashback ---
@@ -151,7 +176,12 @@ fun SecaoCentralO() {
         }
 
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
+
+
+
 
 
 
@@ -173,7 +203,11 @@ fun SecaoCentralO() {
         }
 
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
+
+
 
 
         // Botão "Mostrar mais"
@@ -188,7 +222,11 @@ fun SecaoCentralO() {
         }
 
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
+
+
 
 
         // --- Seção de Banner de Ofertas Especiais ---
@@ -209,6 +247,8 @@ fun SecaoCentralO() {
         )
 
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "Ofertas no precinho!",
@@ -220,8 +260,13 @@ fun SecaoCentralO() {
 }
 
 
+
+
 @Composable
 fun CashbackItem(data: CashbackItemData) {
+    val context = LocalContext.current
+
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
             painter = painterResource(id = data.imageResId),
@@ -229,6 +274,11 @@ fun CashbackItem(data: CashbackItemData) {
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(30.dp))
+                .clickable {
+                    // Ação ao clicar na imagem
+                    val intent = Intent(Intent.ACTION_VIEW, data.url.toUri())
+                    context.startActivity(intent)
+                }
         )
         Text(text = "SUPER", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
         Text(text = "CASHBACK", color = Color.Gray, fontSize = 10.sp)
@@ -236,6 +286,8 @@ fun CashbackItem(data: CashbackItemData) {
         Text(text = data.description, fontSize = 12.sp, color = Color.Gray)
     }
 }
+
+
 
 
 @Composable
@@ -262,6 +314,8 @@ fun ProductCard(data: ProductItemData) {
         }
     }
 }
+
+
 
 
 
