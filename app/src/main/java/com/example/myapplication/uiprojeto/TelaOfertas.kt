@@ -72,10 +72,9 @@ data class ProductItemData(
 @Preview(showBackground = true)
 @Composable
 fun TelaOfertas() {
-    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        // topBar e bottomBar foram removidos daqui
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -99,6 +98,7 @@ fun SecaoCentralO() {
     var searchText by remember { mutableStateOf("") }
     val recentSearches = remember { mutableStateListOf<String>() }
     val keyboardController = LocalSoftwareKeyboardController.current
+
 
     val cashbackItems = listOf(
         CashbackItemData("11%", "de cashback", R.drawable.vivara, "https://www.vivara.com.br"),
@@ -133,12 +133,18 @@ fun SecaoCentralO() {
         )
     )
 
+
+    // Variável de estado para controlar a visibilidade das ofertas especiais
+    var showSpecialOffers by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // Barra de Pesquisa funcional
+        // ... (Seu código da barra de pesquisa e carrosséis) ...
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -171,6 +177,7 @@ fun SecaoCentralO() {
             )
         )
 
+
         // Seção para mostrar as pesquisas recentes
         if (recentSearches.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -198,7 +205,9 @@ fun SecaoCentralO() {
             }
         }
 
+
         Spacer(modifier = Modifier.height(16.dp))
+
 
         // --- Carrossel de Cashback ---
         Row(
@@ -212,7 +221,9 @@ fun SecaoCentralO() {
             }
         }
 
+
         Spacer(modifier = Modifier.height(24.dp))
+
 
         Text(
             text = "Julius Shop indica! ❤️",
@@ -231,43 +242,64 @@ fun SecaoCentralO() {
             }
         }
 
+
         Spacer(modifier = Modifier.height(24.dp))
 
+
+        // Botão para mostrar/esconder o conteúdo
         Button(
-            onClick = { /* Ação do botão */ },
+            onClick = { showSpecialOffers = !showSpecialOffers }, // Inverte o valor da variável de estado
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
         ) {
-            Text(text = "Mostrar mais", color = Color.White)
+            Text(
+                text = if (showSpecialOffers) "Mostrar menos" else "Mostrar mais", // Muda o texto do botão
+                color = Color.White
+            )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Ofertas Especiais",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Image(
-            painter = painterResource(id = R.drawable.meme),
-            contentDescription = "Banner de Oferta Especial",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
 
         Spacer(modifier = Modifier.height(24.dp))
+
+
+        // Conteúdo condicional que só será exibido se showSpecialOffers for true
+        if (showSpecialOffers) {
+            Text(
+                text = "Ofertas Especiais",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.meme),
+                contentDescription = "Banner de Oferta Especial",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        val intent = Intent(
+                            Intent.ACTION_VIEW,
+                            "https://www.condor.com.br/".toUri() // Link para a oferta
+                        )
+                        context.startActivity(intent)
+                    },
+                contentScale = ContentScale.Crop
+            )
+
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }
 
 @Composable
 fun CashbackItem(data: CashbackItemData) {
     val context = LocalContext.current
+
+
 
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -297,6 +329,7 @@ fun CashbackItem(data: CashbackItemData) {
 fun ProductCard(data: ProductItemData) {
     val context = LocalContext.current
 
+
     Card(
         modifier = Modifier
             .width(180.dp)
@@ -324,3 +357,5 @@ fun ProductCard(data: ProductItemData) {
         }
     }
 }
+
+
