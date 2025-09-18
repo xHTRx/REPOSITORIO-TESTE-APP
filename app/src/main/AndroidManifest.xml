@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -18,36 +19,8 @@
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".uiprojeto.telasactivity.TelaqrActivity"
-            android:exported="false"
-            android:label="QR Code"
-            android:theme="@style/Theme.MyApplication" />
-
-        <activity
-            android:name=".uiprojeto.telasactivity.TelacarteirinhaActivity"
-            android:exported="false"
-            android:label="Carteirinha"
-            android:theme="@style/Theme.MyApplication" />
-
-        <activity
-            android:name=".uiprojeto.telasactivity.TelahomeActivity"
-            android:exported="false"
-            android:label="Home"
-            android:theme="@style/Theme.MyApplication" />
-
-        <activity
-            android:name=".uiprojeto.telasactivity.TelaofertasActivity"
-            android:exported="false"
-            android:label="Ofertas"
-            android:theme="@style/Theme.MyApplication" />
     </application>
-
-
-
-
 </manifest>

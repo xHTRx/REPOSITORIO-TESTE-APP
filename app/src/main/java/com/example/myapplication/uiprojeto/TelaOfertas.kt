@@ -51,7 +51,7 @@ data class CashbackItemData(
     val percentage: String,
     val description: String,
     val imageResId: Int,
-    val url: String // Adicionamos este campo para armazenar o link
+    val url: String
 )
 
 
@@ -75,21 +75,8 @@ fun TelaOfertas() {
     val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Box(modifier = Modifier.padding(top = 25.dp)) {
-                Cabecalho(titulo = "Benefícios e Ofertas" ,mostrarIconeDeRosto = false)
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.padding(bottom = 25.dp)) {
-                Rodape(context = context)
-            }
-        },
-
-
-
-
-        ) { innerPadding ->
+        // topBar e bottomBar foram removidos daqui
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -317,8 +304,8 @@ fun ProductCard(data: ProductItemData) {
             .clickable {
                 // Ação: Abrir o link no navegador
                 val intent = Intent(Intent.ACTION_VIEW, data.url.toUri())
-            context.startActivity(intent)
-         },
+                context.startActivity(intent)
+            },
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -337,8 +324,3 @@ fun ProductCard(data: ProductItemData) {
         }
     }
 }
-
-
-
-
-

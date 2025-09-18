@@ -33,26 +33,17 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 import kotlinx.coroutines.delay
 
-@Preview(showBackground = true)
 @Composable
 fun Telaqr() {
-    val context = LocalContext.current
+    val context = LocalContext.current // Você pode até remover esta linha se não a usar
+
+    // O Scaffold não precisa mais de topBar e bottomBar
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Box(modifier = Modifier.padding(top = 0.dp)) {
-                Cabecalho(titulo= "QR Code", mostrarIconeDeRosto = false)
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.padding(bottom = 25.dp)) {
-                Rodape(context = context)
-            }
-        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
+                .padding(innerPadding) // Mantemos o padding para evitar sobreposição com o rodapé e cabeçalho globais
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
@@ -62,6 +53,7 @@ fun Telaqr() {
     }
 }
 
+// O restante do código da sua tela continua o mesmo
 @Composable
 fun SecaoCentralqr(modifier: Modifier = Modifier) {
     Column(
@@ -72,7 +64,7 @@ fun SecaoCentralqr(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Escanei o QR Code!!",
+            "Escaneie o QR Code!!",
             style = MaterialTheme.typography.headlineLarge,
         )
         Spacer(modifier = Modifier.height(40.dp))

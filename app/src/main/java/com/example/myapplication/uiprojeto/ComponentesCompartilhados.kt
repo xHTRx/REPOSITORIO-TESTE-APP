@@ -1,6 +1,5 @@
 package com.example.myapplication.uiprojeto
 
-import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -31,14 +30,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
-import android.content.Context
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.example.myapplication.uiprojeto.telasactivity.TelahomeActivity
-import com.example.myapplication.uiprojeto.telasactivity.TelaqrActivity
-import com.example.myapplication.uiprojeto.telasactivity.TelaofertasActivity
-import com.example.myapplication.uiprojeto.telasactivity.TelacarteirinhaActivity
-
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 
 
 @Composable
@@ -82,8 +75,9 @@ fun Cabecalho(titulo: String, mostrarIconeDeRosto: Boolean) {
     }
 }
 
+// O componente Rodape agora recebe o NavController como parâmetro
 @Composable
-fun Rodape(context: Context) {
+fun Rodape(navController: NavController) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier
@@ -104,8 +98,13 @@ fun Rodape(context: Context) {
                     contentDescription = "Ícone de casa",
                     modifier = Modifier.size(100.dp)
                         .clickable {
-                            val intent = Intent(context, TelahomeActivity::class.java)
-                            context.startActivity(intent)
+                            // Substituído Intent por navController.navigate
+                            navController.navigate("home") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
                 )
                 Image(
@@ -113,8 +112,13 @@ fun Rodape(context: Context) {
                     contentDescription = "Ícone de celular",
                     modifier = Modifier.size(100.dp)
                         .clickable {
-                            val intent = Intent(context, TelacarteirinhaActivity::class.java)
-                            context.startActivity(intent)
+                            // Substituído Intent por navController.navigate
+                            navController.navigate("carteirinha") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
                 )
                 Image(
@@ -122,8 +126,13 @@ fun Rodape(context: Context) {
                     contentDescription = "Ícone de ofertas",
                     modifier = Modifier.size(110.dp)
                         .clickable {
-                            val intent = Intent(context, TelaofertasActivity::class.java)
-                            context.startActivity(intent)
+                            // Substituído Intent por navController.navigate
+                            navController.navigate("ofertas") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
                 )
                 Image(
@@ -132,8 +141,13 @@ fun Rodape(context: Context) {
                     modifier = Modifier
                         .size(80.dp)
                         .clickable {
-                            val intent = Intent(context, TelaqrActivity::class.java)
-                            context.startActivity(intent)
+                            // Substituído Intent por navController.navigate
+                            navController.navigate("qrcode") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
                 )
             }

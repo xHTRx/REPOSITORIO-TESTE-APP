@@ -18,18 +18,10 @@ import com.example.myapplication.R
 @Composable
 fun TelaCarteirinha() {
     val context = LocalContext.current
+
+    // O Scaffold não precisa mais de topBar e bottomBar.
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Box(modifier = Modifier.padding(top = 0.dp)) {
-                Cabecalho(titulo = "Carteirinha", mostrarIconeDeRosto = false)
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.padding(bottom = 25.dp)) {
-                Rodape(context = context)
-            }
-        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -38,7 +30,6 @@ fun TelaCarteirinha() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)

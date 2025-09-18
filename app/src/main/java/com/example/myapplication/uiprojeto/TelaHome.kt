@@ -16,21 +16,10 @@ import com.example.myapplication.R
 @Preview(showBackground = true)
 @Composable
 fun TelaHome() {
-    val context = LocalContext.current
+    // O Scaffold não precisa mais de topBar e bottomBar.
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            Box(modifier = Modifier.padding(top = 0.dp)) {
-                Cabecalho(titulo = "Home", mostrarIconeDeRosto = true)
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.padding(bottom = 25.dp)) {
-                Rodape(context = context)
-            }
-        },
-
-        ) { innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -56,8 +45,8 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.logoup),
             contentDescription = "Logo da aplicação",
             modifier = Modifier
-                .fillMaxWidth() // A imagem preenche a largura disponível
-                .heightIn(max = 350.dp) // Define uma altura máxima para a imagem
+                .fillMaxWidth()
+                .heightIn(max = 350.dp)
         )
         Spacer(modifier = Modifier.height(100.dp))
         Row(
