@@ -44,6 +44,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 
 
@@ -69,7 +70,6 @@ data class ProductItemData(
 
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-@Preview(showBackground = true)
 @Composable
 fun TelaOfertas() {
     Scaffold(
@@ -88,7 +88,12 @@ fun TelaOfertas() {
     }
 }
 
-annotation class Preview(val showBackground: Boolean)
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@Preview(showBackground = true)
+@Composable
+fun TelaOfertasPreview() {
+    TelaOfertas()
+}
 
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -144,7 +149,7 @@ fun SecaoCentralO() {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        // ... (Seu código da barra de pesquisa e carrosséis) ...
+        // ... (Código da barra de pesquisa e carrosséis) ...
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -194,7 +199,7 @@ fun SecaoCentralO() {
                     Text(
                         text = searchItem,
                         modifier = Modifier
-                            .fillMaxWidth()
+                                                        .fillMaxWidth()
                             .clickable {
                                 searchText = searchItem
                             }
@@ -300,20 +305,21 @@ fun CashbackItem(data: CashbackItemData) {
     val context = LocalContext.current
 
 
-
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .clickable {
+                // Ação ao clicar no item inteiro
+                val intent = Intent(Intent.ACTION_VIEW, data.url.toUri())
+                context.startActivity(intent)
+            },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Image(
             painter = painterResource(id = data.imageResId),
             contentDescription = null,
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(30.dp))
-                .clickable {
-                    // Ação ao clicar na imagem
-                    val intent = Intent(Intent.ACTION_VIEW, data.url.toUri())
-                    context.startActivity(intent)
-                }
         )
         Text(text = "SUPER", color = Color.Gray, fontSize = 10.sp, fontWeight = FontWeight.Bold)
         Text(text = "CASHBACK", color = Color.Gray, fontSize = 10.sp)
