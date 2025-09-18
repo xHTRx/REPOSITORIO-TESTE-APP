@@ -160,29 +160,35 @@ fun Rodape(navController: NavController) {
 fun CardSecao(
     texto: String,
     modifier: Modifier = Modifier,
-    cor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    @DrawableRes imagemResId: Int
+    cor: Color,
+    imagemResId: Int,
+    onClick: () -> Unit // Adicionamos este novo parâmetro
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier
+            .clickable(onClick = onClick), // Envolvemos o Card com o modificador de clique
         colors = CardDefaults.cardColors(containerColor = cor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(4.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
                 painter = painterResource(id = imagemResId),
                 contentDescription = null,
-                modifier = Modifier.size(60.dp)
+                modifier = Modifier
+                    .size(60.dp)
+                    .align(Alignment.CenterHorizontally)
             )
-            if (texto.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = texto)
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = texto,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White
+            )
         }
     }
 }

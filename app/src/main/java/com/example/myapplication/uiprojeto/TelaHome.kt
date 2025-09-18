@@ -1,5 +1,7 @@
 package com.example.myapplication.uiprojeto
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -34,6 +36,9 @@ fun TelaHome() {
 
 @Composable
 fun SecaoCentralH(modifier: Modifier = Modifier) {
+    // Obtenha o contexto atual para poder iniciar uma nova Activity (navegador)
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -60,7 +65,12 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFFD80E0E),
-                imagemResId = R.drawable.celularcard
+                imagemResId = R.drawable.celularcard,
+                onClick = {
+                    val url = "https://www.google.com" // Substitua pela URL desejada
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    context.startActivity(intent)
+                }
             )
             Spacer(modifier = Modifier.width(12.dp))
             CardSecao(
@@ -69,7 +79,12 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFF08259D),
-                imagemResId = R.drawable.qrcode
+                imagemResId = R.drawable.qrcode,
+                onClick = {
+                    val url = "https://www.bing.com" // Substitua pela URL desejada
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    context.startActivity(intent)
+                }
             )
         }
         Spacer(modifier = Modifier.height(9.dp))
@@ -84,7 +99,10 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFFEAB505),
-                imagemResId = R.drawable.identidade
+                imagemResId = R.drawable.identidade,
+                onClick = {
+                    // Adicione sua URL aqui
+                }
             )
             Spacer(modifier = Modifier.width(12.dp))
             CardSecao(
@@ -93,7 +111,10 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFF1D9E99),
-                imagemResId = R.drawable.presente
+                imagemResId = R.drawable.presente,
+                onClick = {
+                    // Adicione sua URL aqui
+                }
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -108,7 +129,10 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFF7C33A8),
-                imagemResId = R.drawable.user
+                imagemResId = R.drawable.user,
+                onClick = {
+                    // Adicione sua URL aqui
+                }
             )
             Spacer(modifier = Modifier.width(8.dp))
             CardSecao(
@@ -117,7 +141,10 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFFFF4500),
-                imagemResId = R.drawable.camera
+                imagemResId = R.drawable.camera,
+                onClick = {
+                    // Adicione sua URL aqui
+                }
             )
             Spacer(modifier = Modifier.width(8.dp))
             CardSecao(
@@ -126,8 +153,12 @@ fun SecaoCentralH(modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFF16703C),
-                imagemResId = R.drawable.sino
+                imagemResId = R.drawable.sino,
+                onClick = {
+                    // Adicione sua URL aqui
+                }
             )
         }
     }
 }
+
