@@ -40,6 +40,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -150,6 +151,8 @@ fun SecaoCentralO() {
             .padding(horizontal = 16.dp)
     ) {
         // ... (Código da barra de pesquisa e carrosséis) ...
+        var isSearchFocused by remember { mutableStateOf(false) }
+
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -160,11 +163,12 @@ fun SecaoCentralO() {
                     contentDescription = "Ícone de busca"
                 )
             },
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Gray,
-                unfocusedBorderColor = Color.LightGray
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    isSearchFocused = focusState.isFocused
+                },
+            singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(
                 onSearch = {
@@ -182,10 +186,9 @@ fun SecaoCentralO() {
             )
         )
 
-
-        // Seção para mostrar as pesquisas recentes
+// Seção para mostrar as pesquisas recentes
         if (recentSearches.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = "Pesquisas Recentes",
                 fontSize = 16.sp,
@@ -193,13 +196,13 @@ fun SecaoCentralO() {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             LazyColumn(
-                modifier = Modifier.height(100.dp)
+                modifier = Modifier.height(70.dp)
             ) {
                 items(recentSearches) { searchItem ->
                     Text(
                         text = searchItem,
                         modifier = Modifier
-                                                        .fillMaxWidth()
+                            .fillMaxWidth()
                             .clickable {
                                 searchText = searchItem
                             }
