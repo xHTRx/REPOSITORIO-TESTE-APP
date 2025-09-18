@@ -162,17 +162,17 @@ fun CardSecao(
     modifier: Modifier = Modifier,
     cor: Color,
     imagemResId: Int,
-    onClick: () -> Unit // Adicionamos este novo parâmetro
+    onClick: () -> Unit
 ) {
     Card(
         modifier = modifier
-            .clickable(onClick = onClick), // Envolvemos o Card com o modificador de clique
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = cor),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(3.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

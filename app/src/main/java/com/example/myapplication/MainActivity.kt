@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun AppScreen() {
-    // 1. O controlador de navegação é criado uma única vez
+
     val navController = rememberNavController()
 
     Scaffold(
@@ -64,7 +64,8 @@ fun AppScreen() {
         ) {
             // 4. Cada composable define uma tela
             composable("home") {
-                TelaHome()
+                // Passa o navController para a TelaHome
+                TelaHome(navController = navController)
             }
             composable("carteirinha") {
                 TelaCarteirinha()
