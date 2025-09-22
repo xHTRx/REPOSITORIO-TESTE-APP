@@ -6,20 +6,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 
+@OptIn(ExperimentalPagerApi::class)
 @Preview(showBackground = true)
 @Composable
 fun TelaCarteirinha() {
-    val context = LocalContext.current
+    val pagerState = rememberPagerState()
+    val images = listOf(
+        R.drawable.carteira,
+        R.drawable.carteira
+    )
 
-    // O Scaffold não precisa mais de topBar e bottomBar.
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
@@ -39,12 +43,19 @@ fun TelaCarteirinha() {
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 8.dp
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.carteira),
-                    contentDescription = "Carteirinha Universitária",
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
+                HorizontalPager(
+                    count = images.size,
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    // Exibe a imagem correspondente à página atual
+                    Image(
+                        painter = painterResource(id = images[page]),
+                        contentDescription = if (page == 0) "Frente da Carteirinha Universitária" else "Verso da Carteirinha Universitária",
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
             }
         }
     }

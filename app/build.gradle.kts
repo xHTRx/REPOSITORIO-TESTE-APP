@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("com.google.accompanist:accompanist-pager:0.28.0")
 
     // Use 'val' para declarar a variável em Kotlin DSL
     val nav_version = "2.7.7"
