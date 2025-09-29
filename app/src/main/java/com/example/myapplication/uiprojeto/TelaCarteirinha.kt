@@ -21,7 +21,7 @@ fun TelaCarteirinha() {
     val pagerState = rememberPagerState()
     val images = listOf(
         R.drawable.carteira,
-        R.drawable.carteira
+        R.drawable.versocarteira
     )
 
     Scaffold(
@@ -36,7 +36,7 @@ fun TelaCarteirinha() {
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.88f)
                     .heightIn(max = 550.dp)
                     .padding(16.dp),
                 color = MaterialTheme.colorScheme.surface,
