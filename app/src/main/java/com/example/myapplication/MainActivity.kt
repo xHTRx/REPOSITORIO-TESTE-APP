@@ -24,6 +24,7 @@ import com.example.myapplication.uiprojeto.TelaCarteirinha
 import com.example.myapplication.uiprojeto.TelaHome
 import com.example.myapplication.uiprojeto.TelaOfertas
 import com.example.myapplication.uiprojeto.Telaqr
+import com.example.myapplication.uiprojeto.TelaCadastroUsuario
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -76,6 +77,9 @@ fun AppScreen() {
             }
             composable("qrcode") {
                 Telaqr()
+            }
+            composable("cadastroUsuario") {
+                TelaCadastroUsuario()
             }
         }
     }

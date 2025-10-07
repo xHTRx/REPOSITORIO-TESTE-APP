@@ -122,14 +122,14 @@ fun SecaoCentralH(modifier: Modifier = Modifier, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             CardSecao(
-                texto = "Carteirinha",
+                texto = "Usuários CRUD",
                 modifier = Modifier
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFF7C33A8),
                 imagemResId = R.drawable.user,
                 onClick = {
-                    navController.navigate("carteirinha")
+                    navController.navigate("cadastroUsuario") // <--- MUDANÇA: Navega para a nova tela
                 }
             )
             Spacer(modifier = Modifier.width(8.dp))
