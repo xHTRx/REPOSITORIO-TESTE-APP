@@ -14,5 +14,7 @@ data class Usuario(
     // Campos da tabela
     val nome: String,
     val email: String,
-    val senha: String
+    val senha: String,
+    val cpf: String,
+    val telefone: String?
 )

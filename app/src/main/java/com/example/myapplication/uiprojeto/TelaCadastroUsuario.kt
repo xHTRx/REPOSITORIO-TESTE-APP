@@ -1,18 +1,20 @@
 package com.example.myapplication.uiprojeto
 
 // --- IMPORTS OBRIGATÓRIOS ---
-import android.util.Log // Para a função Log
-import androidx.compose.runtime.LaunchedEffect // Para carregar os dados na inicialização
-import com.example.myapplication.data.database.AppDatabase // <--- Import do AppDatabase
-import com.example.myapplication.data.database.dao.UsuarioDAO // <--- Import do UserDAO
-import com.example.myapplication.data.database.entities.Usuario // <--- Import da entidade User (Usei 'User' baseado na sua estrutura de pastas, não 'Usuario')
+import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
+import com.example.myapplication.data.database.AppDatabase
+import com.example.myapplication.data.database.dao.UsuarioDAO
+import com.example.myapplication.data.database.entities.Usuario
+
+// --- NOVOS IMPORTS PARA O SNACKBAR ---
+// Removido o import android.widget.Toast
+import kotlinx.coroutines.withContext
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -31,7 +33,7 @@ import kotlinx.coroutines.launch
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO (Movidas para o topo para fácil acesso)
+// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO (Mantidas)
 // -------------------------------------------------------------------------
 
 suspend fun deletarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
@@ -50,36 +52,35 @@ suspend fun atualizarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
     }
 }
 
-suspend fun inserirUsuario(nome: String, email: String, senha: String, usuarioDao: UsuarioDAO) {
+suspend fun inserirUsuario(nome: String, email: String, senha: String, cpf: String, telefone: String?, usuarioDao: UsuarioDAO) {
     try {
-        // Cria um novo objeto User (o ID será autogerado)
-        val novoUsuario = Usuario(nome = nome, email = email, senha = senha)
+        val novoUsuario = Usuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone)
         usuarioDao.inserir(novoUsuario)
     } catch (e: Exception) {
         Log.e("Erro ao adicionar", "Usuário: ${e.message}")
     }
 }
 
-suspend fun buscarUsuarios(usuarioDao: UsuarioDAO): List<Usuario> {
+suspend fun buscarUsuarioUnico(usuarioDao: UsuarioDAO): Usuario? {
     return try {
-        usuarioDao.buscarTodos()
+        usuarioDao.buscarUsuarioUnico()
     } catch (e: Exception) {
-        Log.e("Erro ao buscar", "Usuários: ${e.message}")
-        emptyList()
+        Log.e("Erro ao buscar", "Usuário Único: ${e.message}")
+        null
     }
 }
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE INDIVIDUAL DO ITEM DA LISTA
+// COMPOSABLE INDIVIDUAL DO ITEM DA LISTA (Mantido, mas não usado)
 // -------------------------------------------------------------------------
 
 @Composable
 fun UmUsuario(
-    usuario: Usuario, // CORRIGIDO: Usando a entidade User
+    usuario: Usuario,
     displayIndex: Int,
-    onEditClick: (Usuario) -> Unit, // CORRIGIDO: Usando a entidade User
-    onDeleteClick: (Usuario) -> Unit // CORRIGIDO: Usando a entidade User
+    onEditClick: (Usuario) -> Unit,
+    onDeleteClick: (Usuario) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -103,6 +104,8 @@ fun UmUsuario(
             ) {
                 Text(text = usuario.nome, style = MaterialTheme.typography.titleMedium)
                 Text(text = usuario.email, style = MaterialTheme.typography.bodySmall)
+                Text(text = usuario.cpf, style = MaterialTheme.typography.titleMedium)
+                usuario.telefone?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
             }
 
             // ÍCONE DE EDITAR
@@ -126,37 +129,87 @@ fun UmUsuario(
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE TELA DE CADASTRO PRINCIPAL
+// COMPOSABLE TELA DE CADASTRO PRINCIPAL (Com Snackbar adicionado)
 // -------------------------------------------------------------------------
-
 @Composable
 fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
-    // ESTADOS DO FORMULÁRIO
-    var listaUsuarios by remember { mutableStateOf<List<Usuario>>(emptyList()) } // CORRIGIDO: Usando a entidade User
+
+    // ESTADOS
+    var usuarioPrincipal by remember { mutableStateOf<Usuario?>(null) }
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
-    var usuarioEditando by remember { mutableStateOf<Usuario?>(null) } // CORRIGIDO: Usando a entidade User
+    var cpf by remember { mutableStateOf("") }
+    var telefone by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    // Acesso ao banco de dados Room
-    // CORRIGIDO: Usando o nome da classe AppDatabase
     val db = AppDatabase.getDatabase(context)
-    val usuarioDao = db.usuarioDAO() // CORRIGIDO: Garantindo que o nome da função no AppDatabase é 'userDAO()'
+    val usuarioDao = db.usuarioDAO()
 
-    // Lógica para recarregar a lista
-    fun recarregarUsuarios() {
-        CoroutineScope(Dispatchers.Main).launch {
-            listaUsuarios = buscarUsuarios(usuarioDao)
+    // 1. ESTADO PARA CONTROLAR O SNACKBAR
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Lógica para carregar o usuário e preencher os campos (mantida)
+    suspend fun atualizarEstadoUsuario(usuarioDao: UsuarioDAO, setUsuarioPrincipal: (Usuario?) -> Unit,
+                                       setNome: (String) -> Unit, setEmail: (String) -> Unit,
+                                       setSenha: (String) -> Unit, setCpf: (String) -> Unit,
+                                       setTelefone: (String) -> Unit) {
+        val usuarioCarregado = withContext(Dispatchers.IO) {
+            buscarUsuarioUnico(usuarioDao)
+        }
+        withContext(Dispatchers.Main) {
+            setUsuarioPrincipal(usuarioCarregado)
+            if (usuarioCarregado != null) {
+                setNome(usuarioCarregado.nome)
+                setEmail(usuarioCarregado.email)
+                setSenha(usuarioCarregado.senha)
+                setCpf(usuarioCarregado.cpf)
+                setTelefone(usuarioCarregado.telefone ?: "")
+            } else {
+                setNome("")
+                setEmail("")
+                setSenha("")
+                setCpf("")
+                setTelefone("")
+            }
         }
     }
 
-    // EFEITO: Carrega os dados na inicialização
+    // EFEITO: Carrega os dados na inicialização (mantido)
     LaunchedEffect(Unit) {
-        recarregarUsuarios()
+        atualizarEstadoUsuario(
+            usuarioDao,
+            { usuarioPrincipal = it },
+            { nome = it },
+            { email = it },
+            { senha = it },
+            { cpf = it },
+            { telefone = it }
+        )
     }
 
-    Scaffold { innerPadding ->
+    // 2. ADICIONADO O SNACKBAR HOST NO SCAFFOLD
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                // LÓGICA PARA ESCOLHER A COR DE FUNDO
+                val containerColor = when (data.visuals.actionLabel) {
+                    "EDIT" -> MaterialTheme.colorScheme.primary // Cor do tema (azul do cabeçalho)
+                    "DELETE" -> Color.Red // Cor vermelha para exclusão
+                    "CREATE" -> Color(0xFF006400) // Verde para criação
+                    else -> MaterialTheme.colorScheme.tertiaryContainer
+                }
+
+                Snackbar(
+                    snackbarData = data,
+                    // 1. COR DO FUNDO
+                    containerColor = containerColor,
+                    // 2. COR DO TEXTO
+                    contentColor = Color.White
+                )
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -164,8 +217,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // CARD DO FORMULÁRIO DE CADASTRO
+            // CARD DO FORMULÁRIO DE CADASTRO/EDIÇÃO (mantido)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -174,92 +226,86 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                 border = BorderStroke(1.dp, Color.Black)
             ) {
                 Column(Modifier.padding(16.dp)) {
+                    // ... (TextFields)
 
-                    TextField(
-                        value = nome,
-                        onValueChange = { nome = it },
-                        label = { Text("Nome Completo") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
+                    TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome Completo") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(10.dp))
-
-                    TextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
+                    TextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(10.dp))
-
-                    TextField(
-                        value = senha,
-                        onValueChange = { senha = it },
-                        label = { Text("Senha") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
+                    TextField(value = senha, onValueChange = { senha = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(10.dp))
+                    TextField(value = cpf, onValueChange = { cpf = it }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(10.dp))
+                    TextField(value = telefone, onValueChange = { telefone = it }, label = { Text("Telefone (Opcional)") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    // BOTÃO DE ADIÇÃO/EDIÇÃO
+                    // BOTÃO DE AÇÃO PRINCIPAL
                     Button(
                         onClick = {
-                            if (nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank()) {
+                            if (nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank() && cpf.isNotBlank()) {
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    if (usuarioEditando == null) {
-                                        // MODO ADICIONAR
-                                        inserirUsuario(nome, email, senha, usuarioDao)
+                                    if (usuarioPrincipal == null) {
+                                        // MODO CRIAR CONTA (CREATE)
+                                        inserirUsuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null }, usuarioDao = usuarioDao)
+                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
+
+                                        // ⭐️ SNACKBAR: Conta Criada (com actionLabel="CREATE")
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Conta criada com sucesso!",
+                                                actionLabel = "CREATE", // Código para a cor verde
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     } else {
-                                        // MODO EDITAR
-                                        val usuarioAtualizado = usuarioEditando!!.copy(
-                                            nome = nome,
-                                            email = email,
-                                            senha = senha
-                                        )
+                                        // MODO SALVAR EDIÇÃO (UPDATE)
+                                        val usuarioAtualizado = usuarioPrincipal!!.copy(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null })
                                         atualizarUsuario(usuarioAtualizado, usuarioDao)
-                                        usuarioEditando = null // Sai do modo de edição
+
+                                        // ⭐️ SNACKBAR: Conta Alterada (com actionLabel="EDIT")
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Conta editada com sucesso!",
+                                                actionLabel = "EDIT", // Código para a cor azul
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
-                                    // Limpa os campos e recarrega após a operação
-                                    nome = ""
-                                    email = ""
-                                    senha = ""
-                                    recarregarUsuarios()
                                 }
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (usuarioEditando == null) "Cadastrar Usuário" else "Salvar Edição")
+                        Text(
+                            if (usuarioPrincipal == null) "Criar Conta" else "Salvar Alterações"
+                        )
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                    // BOTÃO DE DELETAR (DELETE) - Opcional
+                    if (usuarioPrincipal != null) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    deletarUsuario(usuarioPrincipal!!, usuarioDao)
+                                    atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
 
-            // LISTA DE USUÁRIOS
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                itemsIndexed(listaUsuarios) { index, user ->
-                    UmUsuario(
-                        usuario = user,
-                        displayIndex = index + 1,
-                        onEditClick = { itemAEditar ->
-                            // Lógica de Edição: Preenche o formulário
-                            nome = itemAEditar.nome
-                            email = itemAEditar.email
-                            senha = itemAEditar.senha
-                            usuarioEditando = itemAEditar
-                        },
-                        onDeleteClick = { itemADeletar ->
-                            // Lógica de Exclusão
-                            CoroutineScope(Dispatchers.IO).launch {
-                                deletarUsuario(itemADeletar, usuarioDao)
-                                recarregarUsuarios() // Atualiza a lista
-                            }
+                                    // ⭐️ SNACKBAR: Conta Excluída (com actionLabel="DELETE")
+                                    withContext(Dispatchers.Main) {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Conta excluída com sucesso!",
+                                            actionLabel = "DELETE", // Código para a cor vermelha
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) {
+                            Text("Deletar Conta")
                         }
-                    )
+                    }
                 }
             }
         }

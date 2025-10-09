@@ -10,7 +10,7 @@ import com.example.myapplication.data.database.entities.Usuario
 // 1. Definição do banco de dados: inclui a entidade Usuario e incrementa a versão
 @Database(
     entities = [Usuario::class],
-    version = 2, // Versão 2 porque o esquema mudou do projeto original para este
+    version = 3, // Versão 2 porque o esquema mudou do projeto original para este
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -32,7 +32,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "cateirinha_database" // Nome do seu arquivo de banco de dados
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -11,6 +11,9 @@ import com.example.myapplication.data.database.entities.Usuario
 @Dao
 interface UsuarioDAO {
 
+
+    @Query("SELECT * FROM tabela_usuarios LIMIT 1")
+    suspend fun buscarUsuarioUnico(): Usuario?
     /**
      * Insere um novo usuário na tabela.
      * @param usuario O objeto Usuario a ser inserido.
