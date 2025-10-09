@@ -1,3 +1,4 @@
 # Projeto Carteirinha Up
-## NOME:
+## NOMES:
 Heitor Augusto Andrade
+Jhanny Aparecida Rebeiko Pianovski
