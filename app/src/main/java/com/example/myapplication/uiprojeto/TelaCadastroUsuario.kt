@@ -7,8 +7,6 @@ import com.example.myapplication.data.database.AppDatabase
 import com.example.myapplication.data.database.dao.UsuarioDAO
 import com.example.myapplication.data.database.entities.Usuario
 
-// --- NOVOS IMPORTS PARA O SNACKBAR ---
-// Removido o import android.widget.Toast
 import kotlinx.coroutines.withContext
 
 import androidx.compose.foundation.BorderStroke
@@ -33,7 +31,7 @@ import kotlinx.coroutines.launch
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO (Mantidas)
+// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO
 // -------------------------------------------------------------------------
 
 suspend fun deletarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
@@ -149,7 +147,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     // 1. ESTADO PARA CONTROLAR O SNACKBAR
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Lógica para carregar o usuário e preencher os campos (mantida)
+    // Lógica para carregar o usuário e preencher os campos
     suspend fun atualizarEstadoUsuario(usuarioDao: UsuarioDAO, setUsuarioPrincipal: (Usuario?) -> Unit,
                                        setNome: (String) -> Unit, setEmail: (String) -> Unit,
                                        setSenha: (String) -> Unit, setCpf: (String) -> Unit,
@@ -175,7 +173,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
         }
     }
 
-    // EFEITO: Carrega os dados na inicialização (mantido)
+    // EFEITO: Carrega os dados na inicialização
     LaunchedEffect(Unit) {
         atualizarEstadoUsuario(
             usuarioDao,
@@ -249,7 +247,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                                         inserirUsuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null }, usuarioDao = usuarioDao)
                                         atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
 
-                                        // ⭐️ SNACKBAR: Conta Criada (com actionLabel="CREATE")
+                                        //Conta Criada (com actionLabel="CREATE")
                                         withContext(Dispatchers.Main) {
                                             snackbarHostState.showSnackbar(
                                                 message = "Conta criada com sucesso!",
@@ -262,7 +260,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                                         val usuarioAtualizado = usuarioPrincipal!!.copy(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null })
                                         atualizarUsuario(usuarioAtualizado, usuarioDao)
 
-                                        // ⭐️ SNACKBAR: Conta Alterada (com actionLabel="EDIT")
+                                       //Conta Alterada (com actionLabel="EDIT")
                                         withContext(Dispatchers.Main) {
                                             snackbarHostState.showSnackbar(
                                                 message = "Conta editada com sucesso!",
@@ -281,7 +279,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                         )
                     }
 
-                    // BOTÃO DE DELETAR (DELETE) - Opcional
+                    // BOTÃO DE DELETAR (DELETE)
                     if (usuarioPrincipal != null) {
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
@@ -290,7 +288,7 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                                     deletarUsuario(usuarioPrincipal!!, usuarioDao)
                                     atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
 
-                                    // ⭐️ SNACKBAR: Conta Excluída (com actionLabel="DELETE")
+                                    //Conta Excluída (com actionLabel="DELETE")
                                     withContext(Dispatchers.Main) {
                                         snackbarHostState.showSnackbar(
                                             message = "Conta excluída com sucesso!",

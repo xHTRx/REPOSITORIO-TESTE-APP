@@ -92,14 +92,14 @@ fun SecaoCentralH(modifier: Modifier = Modifier, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             CardSecao(
-                texto = "Carteirinha",
+                texto = "Cronograma",
                 modifier = Modifier
                     .weight(1f)
                     .height(100.dp),
                 cor = Color(0xFFEAB505),
                 imagemResId = R.drawable.identidade,
                 onClick = {
-                    navController.navigate("carteirinha")
+                    navController.navigate("cronograma")
                 }
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -122,7 +122,7 @@ fun SecaoCentralH(modifier: Modifier = Modifier, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             CardSecao(
-                texto = "Usuários CRUD",
+                texto = "Info. Usuário",
                 modifier = Modifier
                     .weight(1f)
                     .height(100.dp),

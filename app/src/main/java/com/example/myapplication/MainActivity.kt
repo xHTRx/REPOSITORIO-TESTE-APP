@@ -27,6 +27,7 @@ import com.example.myapplication.uiprojeto.TelaHome
 import com.example.myapplication.uiprojeto.TelaOfertas
 import com.example.myapplication.uiprojeto.Telaqr
 import com.example.myapplication.uiprojeto.TelaCadastroUsuario
+import com.example.myapplication.uiprojeto.TelaCronograma
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -53,7 +54,8 @@ fun AppScreen() {
         "carteirinha" to "Carteirinha",
         "ofertas" to "Benefícios e Ofertas",
         "qrcode" to "QR Code",
-        "cadastroUsuario" to "Cadastro de Usuário" // Novo título para a tela CRUD
+        "cadastroUsuario" to "Cadastro de Usuário",
+        "cronograma" to "Agenda Mensal"
     )
 
     // 2. Observe o estado atual da navegação
@@ -82,12 +84,11 @@ fun AppScreen() {
         // 3. O NavHost gerencia as telas
         NavHost(
             navController = navController,
-            startDestination = "home", // Define a rota inicial
+            startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
             // 4. Cada composable define uma tela
             composable("home") {
-                // Passa o navController para a TelaHome
                 TelaHome(navController = navController)
             }
             composable("carteirinha") {
@@ -101,6 +102,9 @@ fun AppScreen() {
             }
             composable("cadastroUsuario") {
                 TelaCadastroUsuario()
+            }
+            composable("cronograma") { // ⭐️ COMPOSABLE ADICIONADO
+                TelaCronograma()
             }
         }
     }
