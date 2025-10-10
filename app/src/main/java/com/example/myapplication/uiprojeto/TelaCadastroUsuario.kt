@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +32,8 @@ import kotlinx.coroutines.launch
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO
+// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO (MANTIDAS)
 // -------------------------------------------------------------------------
-
 suspend fun deletarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
     try {
         usuarioDao.deletar(usuario)
@@ -70,69 +70,51 @@ suspend fun buscarUsuarioUnico(usuarioDao: UsuarioDAO): Usuario? {
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE INDIVIDUAL DO ITEM DA LISTA (Mantido, mas não usado)
+// COMPOSABLE PARA EXIBIR UM CAMPO NO FORMATO DO TEMA
 // -------------------------------------------------------------------------
 
 @Composable
-fun UmUsuario(
-    usuario: Usuario,
-    displayIndex: Int,
-    onEditClick: (Usuario) -> Unit,
-    onDeleteClick: (Usuario) -> Unit
-) {
-    Card(
+fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
+    Column(
         modifier = Modifier
-            .height(80.dp)
             .fillMaxWidth()
-            .padding(5.dp),
-        elevation = CardDefaults.cardElevation(5.dp),
-        border = BorderStroke(2.dp, Color.Black)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = "$displayIndex", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
 
-            Column(
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
-            ) {
-                Text(text = usuario.nome, style = MaterialTheme.typography.titleMedium)
-                Text(text = usuario.email, style = MaterialTheme.typography.bodySmall)
-                Text(text = usuario.cpf, style = MaterialTheme.typography.titleMedium)
-                usuario.telefone?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
-            }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.DarkGray,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
 
-            // ÍCONE DE EDITAR
-            Icon(
-                Icons.Default.Edit, "Editar",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable { onEditClick(usuario) }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            // ÍCONE DE EXCLUIR
-            Icon(
-                Icons.Default.Close, "Excluir",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable { onDeleteClick(usuario) }
-            )
-        }
+
+        Text(
+            text = value.uppercase(),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Normal,
+            color = Color.Black
+        )
+    }
+    // Separador (Divider), exceto no último
+    if (!isLast) {
+
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            thickness = 1.dp,
+            color = Color.LightGray.copy(alpha = 0.7f)
+        )
     }
 }
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE TELA DE CADASTRO PRINCIPAL (Com Snackbar adicionado)
+// COMPOSABLE TELA DE CADASTRO PRINCIPAL
 // -------------------------------------------------------------------------
 @Composable
 fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
 
-    // ESTADOS
+    // ESTADOS (MANTIDOS)
     var usuarioPrincipal by remember { mutableStateOf<Usuario?>(null) }
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -140,14 +122,15 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     var cpf by remember { mutableStateOf("") }
     var telefone by remember { mutableStateOf("") }
 
+    // Estado para alternar entre MODO EDIÇÃO (TextFields) e MODO VISUALIZAÇÃO (CampoInfoTema)
+    var isEditing by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val db = AppDatabase.getDatabase(context)
     val usuarioDao = db.usuarioDAO()
-
-    // 1. ESTADO PARA CONTROLAR O SNACKBAR
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Lógica para carregar o usuário e preencher os campos
+    // ... (Lógica para carregar o usuário e preencher os campos - MANTIDA)
     suspend fun atualizarEstadoUsuario(usuarioDao: UsuarioDAO, setUsuarioPrincipal: (Usuario?) -> Unit,
                                        setNome: (String) -> Unit, setEmail: (String) -> Unit,
                                        setSenha: (String) -> Unit, setCpf: (String) -> Unit,
@@ -157,6 +140,9 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
         }
         withContext(Dispatchers.Main) {
             setUsuarioPrincipal(usuarioCarregado)
+            // Se carregou, entra no modo visualização, senão entra no modo edição/cadastro
+            isEditing = (usuarioCarregado == null)
+
             if (usuarioCarregado != null) {
                 setNome(usuarioCarregado.nome)
                 setEmail(usuarioCarregado.email)
@@ -173,7 +159,6 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
         }
     }
 
-    // EFEITO: Carrega os dados na inicialização
     LaunchedEffect(Unit) {
         atualizarEstadoUsuario(
             usuarioDao,
@@ -190,19 +175,16 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     Scaffold(
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
-                // LÓGICA PARA ESCOLHER A COR DE FUNDO
                 val containerColor = when (data.visuals.actionLabel) {
-                    "EDIT" -> MaterialTheme.colorScheme.primary // Cor do tema (azul do cabeçalho)
-                    "DELETE" -> Color.Red // Cor vermelha para exclusão
-                    "CREATE" -> Color(0xFF006400) // Verde para criação
-                    else -> MaterialTheme.colorScheme.tertiaryContainer
+                    "EDIT" -> Color(0xFF1976D2) // Azul tema
+                    "DELETE" -> Color.Red
+                    "CREATE" -> Color(0xFF006400) // Verde
+                    else -> MaterialTheme.colorScheme.primary
                 }
 
                 Snackbar(
                     snackbarData = data,
-                    // 1. COR DO FUNDO
                     containerColor = containerColor,
-                    // 2. COR DO TEXTO
                     contentColor = Color.White
                 )
             }
@@ -212,98 +194,159 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(10.dp),
+                .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // CARD DO FORMULÁRIO DE CADASTRO/EDIÇÃO (mantido)
-            Card(
+            // Título Principal
+            Text(
+                text = if (usuarioPrincipal == null) "CADASTRO DE USUÁRIO" else "INFORMAÇÕES CADASTRAIS",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1976D2),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp)
-                    .background(Color.LightGray, RectangleShape),
-                border = BorderStroke(1.dp, Color.Black)
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    // ... (TextFields)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 20.dp, bottom = 8.dp)
+            )
 
-                    TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome Completo") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(10.dp))
-                    TextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(10.dp))
-                    TextField(value = senha, onValueChange = { senha = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(10.dp))
-                    TextField(value = cpf, onValueChange = { cpf = it }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(10.dp))
-                    TextField(value = telefone, onValueChange = { telefone = it }, label = { Text("Telefone (Opcional)") }, modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(20.dp))
+            // Mensagem de Aviso/Contexto
+            Text(
+                text = if (usuarioPrincipal == null)
+                    "Preencha os dados abaixo para criar sua conta."
+                else if (isEditing)
+                    "Edite os campos e salve as alterações."
+                else
+                    "Clique no lápis para editar as informações.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray, // Cinza escuro
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp)
+            )
 
-                    // BOTÃO DE AÇÃO PRINCIPAL
-                    Button(
-                        onClick = {
-                            if (nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank() && cpf.isNotBlank()) {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    if (usuarioPrincipal == null) {
-                                        // MODO CRIAR CONTA (CREATE)
-                                        inserirUsuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null }, usuarioDao = usuarioDao)
-                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
 
-                                        //Conta Criada (com actionLabel="CREATE")
-                                        withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Conta criada com sucesso!",
-                                                actionLabel = "CREATE", // Código para a cor verde
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    } else {
-                                        // MODO SALVAR EDIÇÃO (UPDATE)
-                                        val usuarioAtualizado = usuarioPrincipal!!.copy(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null })
-                                        atualizarUsuario(usuarioAtualizado, usuarioDao)
-
-                                       //Conta Alterada (com actionLabel="EDIT")
-                                        withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Conta editada com sucesso!",
-                                                actionLabel = "EDIT", // Código para a cor azul
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            if (usuarioPrincipal == null) "Criar Conta" else "Salvar Alterações"
-                        )
-                    }
-
-                    // BOTÃO DE DELETAR (DELETE)
-                    if (usuarioPrincipal != null) {
+            // ------------------------------------------------------------------
+            // MODO EDIÇÃO (TextFields para Cadastro/Alteração)
+            // ------------------------------------------------------------------
+            if (usuarioPrincipal == null || isEditing) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    // Removido background e border, usando a cor do tema
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome Completo") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(10.dp))
+                        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(10.dp))
+                        TextField(value = senha, onValueChange = { senha = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(10.dp))
+                        TextField(value = cpf, onValueChange = { cpf = it }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(10.dp))
+                        TextField(value = telefone, onValueChange = { telefone = it }, label = { Text("Telefone (Opcional)") }, modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // BOTÃO DE AÇÃO PRINCIPAL (Criar Conta / Salvar Alterações)
                         Button(
                             onClick = {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    deletarUsuario(usuarioPrincipal!!, usuarioDao)
-                                    atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
+                                if (nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank() && cpf.isNotBlank()) {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val isCreate = (usuarioPrincipal == null)
 
-                                    //Conta Excluída (com actionLabel="DELETE")
-                                    withContext(Dispatchers.Main) {
-                                        snackbarHostState.showSnackbar(
-                                            message = "Conta excluída com sucesso!",
-                                            actionLabel = "DELETE", // Código para a cor vermelha
-                                            duration = SnackbarDuration.Short
-                                        )
+                                        if (isCreate) {
+                                            inserirUsuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null }, usuarioDao = usuarioDao)
+                                        } else {
+                                            val usuarioAtualizado = usuarioPrincipal!!.copy(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null })
+                                            atualizarUsuario(usuarioAtualizado, usuarioDao)
+                                        }
+
+                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
+
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = if (isCreate) "Conta criada com sucesso!" else "Conta editada com sucesso!",
+                                                actionLabel = if (isCreate) "CREATE" else "EDIT",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            // Sai do modo de edição após salvar
+                                            if (!isCreate) isEditing = false
+                                        }
                                     }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Deletar Conta")
+                            Text(if (usuarioPrincipal == null) "Criar Conta" else "Salvar Alterações")
+                        }
+
+                        // BOTÃO DELETAR SÓ VISÍVEL NO MODO EDIÇÃO
+                        if (usuarioPrincipal != null) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Button(
+                                onClick = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        deletarUsuario(usuarioPrincipal!!, usuarioDao)
+                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
+
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Conta excluída com sucesso!",
+                                                actionLabel = "DELETE",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Deletar Conta")
+                            }
                         }
                     }
+                }
+            }
+            // ------------------------------------------------------------------
+            // MODO VISUALIZAÇÃO (Novo Formato de Exibição)
+            // ------------------------------------------------------------------
+            else {
+                // Ícone de Edição (Lápis)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Icon(
+                        Icons.Default.Edit, "Editar",
+                        tint = Color(0xFF1976D2),
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable { isEditing = true } // Entra no modo edição
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Exibição dos Campos no Novo Formato
+                usuarioPrincipal?.let { usuario ->
+                    // Nome Completo
+                    CampoInfoTema(label = "Nome Completo", value = usuario.nome)
+
+                    // Email
+                    CampoInfoTema(label = "E-mail", value = usuario.email)
+
+                    // CPF
+                    CampoInfoTema(label = "CPF", value = usuario.cpf)
+
+                    // Telefone (opcional)
+                    CampoInfoTema(label = "Telefone", value = usuario.telefone ?: "Não informado", isLast = true)
+
                 }
             }
         }

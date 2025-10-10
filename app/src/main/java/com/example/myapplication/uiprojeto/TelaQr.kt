@@ -35,15 +35,14 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun Telaqr() {
-    val context = LocalContext.current // Você pode até remover esta linha se não a usar
+    val context = LocalContext.current
 
-    // O Scaffold não precisa mais de topBar e bottomBar
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding) // Mantemos o padding para evitar sobreposição com o rodapé e cabeçalho globais
+                .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
@@ -53,7 +52,7 @@ fun Telaqr() {
     }
 }
 
-// O restante do código da sua tela continua o mesmo
+
 @Composable
 fun SecaoCentralqr(modifier: Modifier = Modifier) {
     Column(

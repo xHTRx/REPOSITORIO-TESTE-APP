@@ -11,9 +11,9 @@ import com.example.myapplication.data.database.entities.Usuario
 
 // 1. Definição do banco de dados:
 @Database(
-    // ⭐️ 1. Adicione a nova entidade Cronograma
+
     entities = [Usuario::class, Cronograma::class],
-    // ⭐️ 2. Incremente a versão (Era 3, agora é 4)
+
     version = 4,
     exportSchema = false
 )
@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
     // 2. Método para acessar o DAO do Usuario (Mantido)
     abstract fun usuarioDAO(): UsuarioDAO
 
-    // ⭐️ 3. Adicione o método para acessar o novo DAO do Cronograma
+    // 3. Método para acessar o novo DAO do Cronograma
     abstract fun cronogramaDAO(): CronogramaDAO
 
     // 3. Companion Object para o padrão Singleton (Mantido)
@@ -37,7 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "cateirinha_database"
                 )
-                    // ⭐️ Mantido para lidar com a migração (destrói e recria o banco)
+                    //Mantido para lidar com a migração (destrói e recria o banco)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

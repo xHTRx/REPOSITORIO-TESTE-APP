@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Info
-// ⭐️ NOVOS IMPORTS
+// NOVOS IMPORTS
 import com.example.myapplication.data.database.dao.CronogramaDAO
 import com.example.myapplication.data.database.entities.Cronograma
 import androidx.compose.material.icons.filled.DateRange
@@ -66,7 +66,7 @@ suspend fun atualizarCronograma(item: Cronograma, cronogramaDao: CronogramaDAO) 
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE INDIVIDUAL DO CARD DO DIA (SEM ALTERAÇÕES)
+// COMPOSABLE INDIVIDUAL DO CARD DO DIA
 // -------------------------------------------------------------------------
 
 @Composable
@@ -112,7 +112,7 @@ fun ItemDiaCronograma(
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE TELA DO CRONOGRAMA PRINCIPAL (SEM ALTERAÇÕES)
+// COMPOSABLE TELA DO CRONOGRAMA PRINCIPAL
 // -------------------------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -194,7 +194,7 @@ fun TelaCronograma(modifier: Modifier = Modifier) {
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE DIALOG DE EDIÇÃO (ADICIONADA A FUNCIONALIDADE DE LIMPAR EVENTO)
+// COMPOSABLE DIALOG DE EDIÇÃO
 // -------------------------------------------------------------------------
 
 @Composable

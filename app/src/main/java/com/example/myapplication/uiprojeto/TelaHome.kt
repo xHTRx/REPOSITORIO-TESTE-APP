@@ -38,7 +38,7 @@ fun TelaHome(navController: NavController) {
 
 @Composable
 fun SecaoCentralH(modifier: Modifier = Modifier, navController: NavController) {
-    // Obtenha o contexto atual para poder iniciar uma nova Activity (navegador)
+
     val context = LocalContext.current
 
     Column(
@@ -129,7 +129,7 @@ fun SecaoCentralH(modifier: Modifier = Modifier, navController: NavController) {
                 cor = Color(0xFF7C33A8),
                 imagemResId = R.drawable.user,
                 onClick = {
-                    navController.navigate("cadastroUsuario") // <--- MUDANÇA: Navega para a nova tela
+                    navController.navigate("cadastroUsuario")
                 }
             )
             Spacer(modifier = Modifier.width(8.dp))

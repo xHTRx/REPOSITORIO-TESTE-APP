@@ -59,7 +59,6 @@ fun AppScreen() {
     )
 
     // 2. Observe o estado atual da navegação
-    // Isso fará o Cabecalho recompor sempre que a rota mudar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     // 3. Obtenha a rota atual e defina o título
@@ -103,7 +102,7 @@ fun AppScreen() {
             composable("cadastroUsuario") {
                 TelaCadastroUsuario()
             }
-            composable("cronograma") { // ⭐️ COMPOSABLE ADICIONADO
+            composable("cronograma") {
                 TelaCronograma()
             }
         }

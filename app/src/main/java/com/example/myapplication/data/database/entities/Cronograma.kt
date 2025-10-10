@@ -12,5 +12,4 @@ import androidx.room.PrimaryKey
     val nome: String?,
     val horario: String?,
     val descricao: String?
-        // Pode usar String? para os campos que podem ficar vazios
     )
