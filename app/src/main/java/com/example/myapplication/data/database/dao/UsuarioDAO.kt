@@ -1,12 +1,16 @@
 package com.example.myapplication.data.database.dao
 
 
+// ERRO CORRIGIDO: Importe o Flow do kotlinx.coroutines.flow
+import kotlinx.coroutines.flow.Flow
+// Corrigido: Removido import desnecessário e incorreto: import androidx.constraintlayout.helper.widget.Flow
+import androidx.room.*
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.myapplication.data.database.entities.Usuario
+import com.example.myapplication.data.database.entities.Usuario // Se a classe Usuario estiver neste pacote
 
 @Dao
 interface UsuarioDAO {
@@ -49,4 +53,8 @@ interface UsuarioDAO {
      */
     @Query("SELECT * FROM tabela_usuarios WHERE id = :idUsuario")
     suspend fun buscarPorId(idUsuario: Int): Usuario?
+
+    // Método reativo do Room para MVVM
+    @Query("SELECT * FROM tabela_usuarios LIMIT 1") // Se o nome da sua tabela é 'tabela_usuarios'
+    fun buscarUsuarioUnicoFlow(): Flow<Usuario?>
 }

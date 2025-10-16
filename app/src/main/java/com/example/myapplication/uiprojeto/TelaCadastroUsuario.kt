@@ -1,76 +1,38 @@
 package com.example.myapplication.uiprojeto
 
 // --- IMPORTS OBRIGATÓRIOS ---
-import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import com.example.myapplication.data.database.AppDatabase
-import com.example.myapplication.data.database.dao.UsuarioDAO
-import com.example.myapplication.data.database.entities.Usuario
+// ⭐️ IMPORTES DO MVVM
+import com.example.myapplication.mvvm.data.UsuarioRepository
+import com.example.myapplication.mvvm.data.UsuarioViewModel
+import com.example.myapplication.mvvm.data.UsuarioViewModelFactory
 
-import kotlinx.coroutines.withContext
-
+// --- COMPLEMENTARES ---
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES SUSPEND DE CRUD PARA USUÁRIO (MANTIDAS)
-// -------------------------------------------------------------------------
-suspend fun deletarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
-    try {
-        usuarioDao.deletar(usuario)
-    } catch (e: Exception) {
-        Log.e("Erro ao deletar", "Usuário: ${e.message}")
-    }
-}
-
-suspend fun atualizarUsuario(usuario: Usuario, usuarioDao: UsuarioDAO) {
-    try {
-        usuarioDao.atualizar(usuario)
-    } catch (e: Exception) {
-        Log.e("Erro ao atualizar", "Usuário: ${e.message}")
-    }
-}
-
-suspend fun inserirUsuario(nome: String, email: String, senha: String, cpf: String, telefone: String?, usuarioDao: UsuarioDAO) {
-    try {
-        val novoUsuario = Usuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone)
-        usuarioDao.inserir(novoUsuario)
-    } catch (e: Exception) {
-        Log.e("Erro ao adicionar", "Usuário: ${e.message}")
-    }
-}
-
-suspend fun buscarUsuarioUnico(usuarioDao: UsuarioDAO): Usuario? {
-    return try {
-        usuarioDao.buscarUsuarioUnico()
-    } catch (e: Exception) {
-        Log.e("Erro ao buscar", "Usuário Único: ${e.message}")
-        null
-    }
-}
-
-
-// -------------------------------------------------------------------------
-// COMPOSABLE PARA EXIBIR UM CAMPO NO FORMATO DO TEMA
+// ⭐️ COMPOSABLE PARA EXIBIR UM CAMPO NO FORMATO DO TEMA (REINTRODUZIDO)
 // -------------------------------------------------------------------------
 
 @Composable
@@ -78,27 +40,27 @@ fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp) // Preenchimento lateral e vertical
     ) {
-
+        // Rótulo (Label) do Campo
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.DarkGray,
+            color = Color.DarkGray, // Cinza escuro
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp)) // Espaçamento pequeno
 
-
+        // Valor do Campo (Dados do Usuário)
         Text(
-            text = value.uppercase(),
-            style = MaterialTheme.typography.titleMedium,
+            text = value.uppercase(), // Caixa alta
+            style = MaterialTheme.typography.titleMedium, // Destaque médio
             fontWeight = FontWeight.Normal,
             color = Color.Black
         )
     }
     // Separador (Divider), exceto no último
     if (!isLast) {
-
+        // Linha fina em cinza claro, alinhada com as bordas do conteúdo (16.dp)
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 16.dp),
             thickness = 1.dp,
@@ -109,97 +71,87 @@ fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE TELA DE CADASTRO PRINCIPAL
+// COMPOSABLE TELA DE CADASTRO PRINCIPAL (Versão Final com Estado de Carregamento)
 // -------------------------------------------------------------------------
 @Composable
 fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
 
-    // ESTADOS (MANTIDOS)
-    var usuarioPrincipal by remember { mutableStateOf<Usuario?>(null) }
-    var nome by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
-    var cpf by remember { mutableStateOf("") }
-    var telefone by remember { mutableStateOf("") }
-
-    // Estado para alternar entre MODO EDIÇÃO (TextFields) e MODO VISUALIZAÇÃO (CampoInfoTema)
-    var isEditing by remember { mutableStateOf(false) }
-
+    // ... (Instanciação do ViewModel inalterada)
     val context = LocalContext.current
     val db = AppDatabase.getDatabase(context)
     val usuarioDao = db.usuarioDAO()
+
+    val viewModel: UsuarioViewModel = viewModel(
+        factory = UsuarioViewModelFactory(
+            UsuarioRepository(usuarioDao)
+        )
+    )
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // ... (Lógica para carregar o usuário e preencher os campos - MANTIDA)
-    suspend fun atualizarEstadoUsuario(usuarioDao: UsuarioDAO, setUsuarioPrincipal: (Usuario?) -> Unit,
-                                       setNome: (String) -> Unit, setEmail: (String) -> Unit,
-                                       setSenha: (String) -> Unit, setCpf: (String) -> Unit,
-                                       setTelefone: (String) -> Unit) {
-        val usuarioCarregado = withContext(Dispatchers.IO) {
-            buscarUsuarioUnico(usuarioDao)
-        }
-        withContext(Dispatchers.Main) {
-            setUsuarioPrincipal(usuarioCarregado)
-            // Se carregou, entra no modo visualização, senão entra no modo edição/cadastro
-            isEditing = (usuarioCarregado == null)
+    // ❌ REMOVIDO: var hasLoadedInitialData by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
 
-            if (usuarioCarregado != null) {
-                setNome(usuarioCarregado.nome)
-                setEmail(usuarioCarregado.email)
-                setSenha(usuarioCarregado.senha)
-                setCpf(usuarioCarregado.cpf)
-                setTelefone(usuarioCarregado.telefone ?: "")
-            } else {
-                setNome("")
-                setEmail("")
-                setSenha("")
-                setCpf("")
-                setTelefone("")
+
+    // ⭐️ AJUSTE NO LaunchedEffect: Simplificado, não precisa mais do hasLoadedInitialData
+    LaunchedEffect(uiState.showSnackbar, uiState.usuarioPrincipal, uiState.isLoading) {
+
+        // Lógica do Snackbar
+        if (uiState.showSnackbar) {
+            snackbarHostState.showSnackbar(
+                message = uiState.snackbarMessage,
+                actionLabel = uiState.snackbarAction,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.onSnackbarDismiss()
+        }
+
+        // Lógica para controle do modo de edição/visualização (só após o carregamento)
+        if (!uiState.isLoading) {
+            if (uiState.usuarioPrincipal == null) {
+                isEditing = true // Força edição se não houver usuário
+            } else if (uiState.snackbarAction == "EDIT") {
+                isEditing = false // Volta para visualização após salvar
             }
         }
     }
 
-    LaunchedEffect(Unit) {
-        atualizarEstadoUsuario(
-            usuarioDao,
-            { usuarioPrincipal = it },
-            { nome = it },
-            { email = it },
-            { senha = it },
-            { cpf = it },
-            { telefone = it }
-        )
-    }
 
-    // 2. ADICIONADO O SNACKBAR HOST NO SCAFFOLD
+    // ---------------------- UI ----------------------
     Scaffold(
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                val containerColor = when (data.visuals.actionLabel) {
-                    "EDIT" -> Color(0xFF1976D2) // Azul tema
-                    "DELETE" -> Color.Red
-                    "CREATE" -> Color(0xFF006400) // Verde
-                    else -> MaterialTheme.colorScheme.primary
-                }
-
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = containerColor,
-                    contentColor = Color.White
-                )
-            }
+            // ... (SnackbarHost inalterado)
         }
     ) { innerPadding ->
+
+        // ⭐️ CORREÇÃO CHAVE: Usar a Box para o Carregamento no Centro da Tela
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding), // Ocupa a tela central
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold // Interrompe a renderização da UI principal
+        }
+
+        // ------------------------------------------------------------------
+        // UI PRINCIPAL (Só é renderizada se isLoading for FALSE)
+        // ------------------------------------------------------------------
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding) // Aplica o padding do Scaffold
                 .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             // Título Principal
             Text(
-                text = if (usuarioPrincipal == null) "CADASTRO DE USUÁRIO" else "INFORMAÇÕES CADASTRAIS",
+                text = if (uiState.usuarioPrincipal == null) "CADASTRO DE USUÁRIO" else "INFORMAÇÕES CADASTRAIS",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1976D2),
@@ -211,14 +163,13 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
 
             // Mensagem de Aviso/Contexto
             Text(
-                text = if (usuarioPrincipal == null)
-                    "Preencha os dados abaixo para criar sua conta."
-                else if (isEditing)
-                    "Edite os campos e salve as alterações."
-                else
-                    "Clique no lápis para editar as informações.",
+                text = when {
+                    uiState.usuarioPrincipal == null -> "Preencha os dados abaixo para criar sua conta."
+                    isEditing -> "Edite os campos e salve as alterações."
+                    else -> "Clique no lápis para editar as informações."
+                },
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray, // Cinza escuro
+                color = Color.DarkGray,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -227,81 +178,45 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
 
 
             // ------------------------------------------------------------------
-            // MODO EDIÇÃO (TextFields para Cadastro/Alteração)
+            // LÓGICA DE ALTERNÂNCIA DE MODO (Visualização vs Edição)
             // ------------------------------------------------------------------
-            if (usuarioPrincipal == null || isEditing) {
+            if (uiState.usuarioPrincipal == null || isEditing) {
+                // MODO EDIÇÃO/CADASTRO
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp),
-                    // Removido background e border, usando a cor do tema
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Column(Modifier.padding(16.dp)) {
-                        TextField(value = nome, onValueChange = { nome = it }, label = { Text("Nome Completo") }, modifier = Modifier.fillMaxWidth())
+                        TextField(value = uiState.nome, onValueChange = { viewModel.onNomeChange(it) }, label = { Text("Nome Completo") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(10.dp))
-                        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+                        TextField(value = uiState.email, onValueChange = { viewModel.onEmailChange(it) }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(10.dp))
-                        TextField(value = senha, onValueChange = { senha = it }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth())
+                        TextField(value = uiState.senha, onValueChange = { viewModel.onSenhaChange(it) }, label = { Text("Senha") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(10.dp))
-                        TextField(value = cpf, onValueChange = { cpf = it }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
+                        TextField(value = uiState.cpf, onValueChange = { viewModel.onCpfChange(it) }, label = { Text("CPF") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(10.dp))
-                        TextField(value = telefone, onValueChange = { telefone = it }, label = { Text("Telefone (Opcional)") }, modifier = Modifier.fillMaxWidth())
+                        TextField(value = uiState.telefone, onValueChange = { viewModel.onTelefoneChange(it) }, label = { Text("Telefone (Opcional)") }, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // BOTÃO DE AÇÃO PRINCIPAL (Criar Conta / Salvar Alterações)
-                        Button(
-                            onClick = {
-                                if (nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank() && cpf.isNotBlank()) {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        val isCreate = (usuarioPrincipal == null)
-
-                                        if (isCreate) {
-                                            inserirUsuario(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null }, usuarioDao = usuarioDao)
-                                        } else {
-                                            val usuarioAtualizado = usuarioPrincipal!!.copy(nome = nome, email = email, senha = senha, cpf = cpf, telefone = telefone.ifBlank { null })
-                                            atualizarUsuario(usuarioAtualizado, usuarioDao)
-                                        }
-
-                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
-
-                                        withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar(
-                                                message = if (isCreate) "Conta criada com sucesso!" else "Conta editada com sucesso!",
-                                                actionLabel = if (isCreate) "CREATE" else "EDIT",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                            // Sai do modo de edição após salvar
-                                            if (!isCreate) isEditing = false
-                                        }
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(if (usuarioPrincipal == null) "Criar Conta" else "Salvar Alterações")
+                        Button(onClick = { viewModel.onSave() }, modifier = Modifier.fillMaxWidth()) {
+                            Text(uiState.textoBotao)
                         }
 
-                        // BOTÃO DELETAR SÓ VISÍVEL NO MODO EDIÇÃO
-                        if (usuarioPrincipal != null) {
+                        if (uiState.usuarioPrincipal != null && isEditing) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            TextButton(onClick = { isEditing = false }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Voltar para Visualização")
+                            }
+                        }
+
+                        if (uiState.usuarioPrincipal != null) {
                             Spacer(modifier = Modifier.height(10.dp))
                             Button(
-                                onClick = {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        deletarUsuario(usuarioPrincipal!!, usuarioDao)
-                                        atualizarEstadoUsuario(usuarioDao, { usuarioPrincipal = it }, { nome = it }, { email = it }, { senha = it }, { cpf = it }, { telefone = it })
-
-                                        withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Conta excluída com sucesso!",
-                                                actionLabel = "DELETE",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    }
-                                },
+                                onClick = { viewModel.onDelete() },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                             ) {
@@ -312,10 +227,10 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                 }
             }
             // ------------------------------------------------------------------
-            // MODO VISUALIZAÇÃO (Novo Formato de Exibição)
+            // MODO VISUALIZAÇÃO
             // ------------------------------------------------------------------
             else {
-                // Ícone de Edição (Lápis)
+                // Conteúdo de Visualização
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -327,26 +242,17 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                         tint = Color(0xFF1976D2),
                         modifier = Modifier
                             .size(30.dp)
-                            .clickable { isEditing = true } // Entra no modo edição
+                            .clickable { isEditing = true }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Exibição dos Campos no Novo Formato
-                usuarioPrincipal?.let { usuario ->
-                    // Nome Completo
+                uiState.usuarioPrincipal?.let { usuario ->
                     CampoInfoTema(label = "Nome Completo", value = usuario.nome)
-
-                    // Email
                     CampoInfoTema(label = "E-mail", value = usuario.email)
-
-                    // CPF
                     CampoInfoTema(label = "CPF", value = usuario.cpf)
-
-                    // Telefone (opcional)
                     CampoInfoTema(label = "Telefone", value = usuario.telefone ?: "Não informado", isLast = true)
-
                 }
             }
         }

@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.ui.tooling)
     implementation(libs.protolite.well.known.types)
+    implementation(libs.androidx.constraintlayout)
 
     // --- CORREÇÃO DO FIREBASE ---
     // 1. Adiciona o Firebase BOM para gerenciar versões de forma estável (VERSÃO ATUALIZADA)
