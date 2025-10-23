@@ -1,14 +1,11 @@
 package com.example.myapplication.uiprojeto
 
-// --- IMPORTS OBRIGATÓRIOS ---
+
 import androidx.compose.runtime.LaunchedEffect
 import com.example.myapplication.data.database.AppDatabase
-// ⭐️ IMPORTES DO MVVM
 import com.example.myapplication.mvvm.data.UsuarioRepository
 import com.example.myapplication.mvvm.data.UsuarioViewModel
 import com.example.myapplication.mvvm.data.UsuarioViewModelFactory
-
-// --- COMPLEMENTARES ---
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 // -------------------------------------------------------------------------
-// ⭐️ COMPOSABLE PARA EXIBIR UM CAMPO NO FORMATO DO TEMA (REINTRODUZIDO)
+// COMPOSABLE PARA EXIBIR UM CAMPO NO FORMATO DO TEMA (REINTRODUZIDO)
 // -------------------------------------------------------------------------
 
 @Composable
@@ -40,7 +37,7 @@ fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp) // Preenchimento lateral e vertical
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         // Rótulo (Label) do Campo
         Text(
@@ -48,19 +45,19 @@ fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
             style = MaterialTheme.typography.bodySmall,
             color = Color.DarkGray, // Cinza escuro
         )
-        Spacer(modifier = Modifier.height(4.dp)) // Espaçamento pequeno
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Valor do Campo (Dados do Usuário)
         Text(
             text = value.uppercase(), // Caixa alta
-            style = MaterialTheme.typography.titleMedium, // Destaque médio
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Normal,
             color = Color.Black
         )
     }
     // Separador (Divider), exceto no último
     if (!isLast) {
-        // Linha fina em cinza claro, alinhada com as bordas do conteúdo (16.dp)
+
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 16.dp),
             thickness = 1.dp,
@@ -76,7 +73,6 @@ fun CampoInfoTema(label: String, value: String, isLast: Boolean = false) {
 @Composable
 fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
 
-    // ... (Instanciação do ViewModel inalterada)
     val context = LocalContext.current
     val db = AppDatabase.getDatabase(context)
     val usuarioDao = db.usuarioDAO()
@@ -90,11 +86,11 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // ❌ REMOVIDO: var hasLoadedInitialData by remember { mutableStateOf(false) }
+    // var hasLoadedInitialData by remember { mutableStateOf(false) }
     var isEditing by remember { mutableStateOf(false) }
 
 
-    // ⭐️ AJUSTE NO LaunchedEffect: Simplificado, não precisa mais do hasLoadedInitialData
+    //
     LaunchedEffect(uiState.showSnackbar, uiState.usuarioPrincipal, uiState.isLoading) {
 
         // Lógica do Snackbar
@@ -111,8 +107,9 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
         if (!uiState.isLoading) {
             if (uiState.usuarioPrincipal == null) {
                 isEditing = true // Força edição se não houver usuário
-            } else if (uiState.snackbarAction == "EDIT") {
-                isEditing = false // Volta para visualização após salvar
+            }
+            else if (uiState.snackbarAction == "EDIT" || uiState.snackbarAction == "CREATE") {
+                isEditing = false // Volta para visualização após salvar/criar
             }
         }
     }
@@ -121,11 +118,24 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     // ---------------------- UI ----------------------
     Scaffold(
         snackbarHost = {
-            // ... (SnackbarHost inalterado)
+            SnackbarHost(snackbarHostState) { data ->
+                val containerColor = when (data.visuals.actionLabel) {
+                    "EDIT" -> Color(0xFF1976D2) // Azul tema
+                    "DELETE" -> Color.Red
+                    "CREATE" -> Color(0xFF006400) // Verde
+                    else -> MaterialTheme.colorScheme.primary
+                }
+
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = containerColor,
+                    contentColor = Color.White
+                )
+            }
         }
     ) { innerPadding ->
 
-        // ⭐️ CORREÇÃO CHAVE: Usar a Box para o Carregamento no Centro da Tela
+
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier

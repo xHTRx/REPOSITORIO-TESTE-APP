@@ -1,16 +1,15 @@
 package com.example.myapplication.data.database.dao
 
 
-// ERRO CORRIGIDO: Importe o Flow do kotlinx.coroutines.flow
+
 import kotlinx.coroutines.flow.Flow
-// Corrigido: Removido import desnecessário e incorreto: import androidx.constraintlayout.helper.widget.Flow
 import androidx.room.*
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.myapplication.data.database.entities.Usuario // Se a classe Usuario estiver neste pacote
+import com.example.myapplication.data.database.entities.Usuario
 
 @Dao
 interface UsuarioDAO {

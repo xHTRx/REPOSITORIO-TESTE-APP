@@ -46,7 +46,7 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
                             senha = usuario.senha,
                             cpf = usuario.cpf,
                             telefone = usuario.telefone ?: "",
-                            isLoading = false // ⭐️ Termina o carregamento com dados
+                            isLoading = false
                         )
                     } else {
                         // Limpa os campos se o usuário for deletado ou não existir
@@ -57,7 +57,7 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
                             senha = "",
                             cpf = "",
                             telefone = "",
-                            isLoading = false // ⭐️ Termina o carregamento sem dados
+                            isLoading = false
                         )
                     }
                 }
@@ -97,22 +97,34 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
 
         viewModelScope.launch {
             if (state.usuarioPrincipal == null) {
+                // 1. Ação no banco de dados
                 repository.inserir(usuarioParaSalvar)
                 mensagem = "Conta criada com sucesso!"
                 acao = "CREATE"
+
+                // 2. Atualiza o uiState imediatamente
+                _uiState.update {
+                    it.copy(
+                        usuarioPrincipal = usuarioParaSalvar, // <--- ESTE É O PULP DO GATO!
+                        showSnackbar = true,
+                        snackbarMessage = mensagem,
+                        snackbarAction = acao
+                    )
+                }
+
             } else {
                 repository.atualizar(usuarioParaSalvar)
                 mensagem = "Conta editada com sucesso!"
                 acao = "EDIT"
-            }
 
-            // Exibir Snackbar após a operação
-            _uiState.update {
-                it.copy(
-                    showSnackbar = true,
-                    snackbarMessage = mensagem,
-                    snackbarAction = acao
-                )
+                _uiState.update {
+                    it.copy(
+                        usuarioPrincipal = usuarioParaSalvar,
+                        showSnackbar = true,
+                        snackbarMessage = mensagem,
+                        snackbarAction = acao
+                    )
+                }
             }
         }
     }
@@ -131,7 +143,6 @@ class UsuarioViewModel(private val repository: UsuarioRepository) : ViewModel() 
                     snackbarAction = "DELETE"
                 )
             }
-            // Não precisa limpar campos aqui, o init {} já faz isso quando o Flow notifica
         }
     }
 }

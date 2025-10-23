@@ -75,7 +75,7 @@ fun Cabecalho(titulo: String, mostrarIconeDeRosto: Boolean) {
     }
 }
 
-// O componente Rodape agora recebe o NavController como parâmetro
+
 @Composable
 fun Rodape(navController: NavController) {
     Card(

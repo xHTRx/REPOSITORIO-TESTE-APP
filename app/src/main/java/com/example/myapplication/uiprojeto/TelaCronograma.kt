@@ -1,25 +1,22 @@
 package com.example.myapplication.uiprojeto
 
-// --- IMPORTS NECESSÁRIOS ---
+
+import com.example.myapplication.mvvm.data.CronogramaRepository
+import com.example.myapplication.mvvm.data.CronogramaViewModel
+import com.example.myapplication.mvvm.data.CronogramaViewModelFactory
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.data.database.AppDatabase
+import com.example.myapplication.data.database.entities.Cronograma
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.Info
-// NOVOS IMPORTS
-import com.example.myapplication.data.database.dao.CronogramaDAO
-import com.example.myapplication.data.database.entities.Cronograma
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-
-// Imports existentes
-import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
-import com.example.myapplication.data.database.AppDatabase
-import kotlinx.coroutines.withContext
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,40 +26,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES SUSPEND CRUD (SEM ALTERAÇÕES)
+// FUNÇÕES ESTRUTURAIS REMOVIDAS:
+// As funções 'buscarOuCriarCronograma' e 'atualizarCronograma' foram movidas para o CronogramaRepository.
 // -------------------------------------------------------------------------
-
-suspend fun buscarOuCriarCronograma(cronogramaDao: CronogramaDAO): List<Cronograma> {
-    val itemsExistentes = cronogramaDao.getAll()
-
-    if (itemsExistentes.size < 30) {
-        val novosDias = (1..30).map { dia ->
-            Cronograma(
-                diaDoMes = dia,
-                nome = null,
-                horario = null,
-                descricao = null
-            )
-        }
-        cronogramaDao.insertAll(novosDias)
-        return cronogramaDao.getAll()
-    }
-    return itemsExistentes
-}
-
-suspend fun atualizarCronograma(item: Cronograma, cronogramaDao: CronogramaDAO) {
-    try {
-        cronogramaDao.update(item)
-    } catch (e: Exception) {
-        Log.e("Erro ao atualizar", "Cronograma: ${e.message}")
-    }
-}
 
 
 // -------------------------------------------------------------------------
@@ -80,7 +49,6 @@ fun ItemDiaCronograma(
             .padding(vertical = 4.dp, horizontal = 8.dp)
             .clickable { onEditClick(dia) },
         elevation = CardDefaults.cardElevation(3.dp),
-        border = BorderStroke(1.dp, Color.LightGray)
     ) {
         Row(
             modifier = Modifier
@@ -112,34 +80,41 @@ fun ItemDiaCronograma(
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE TELA DO CRONOGRAMA PRINCIPAL
+// COMPOSABLE TELA DO CRONOGRAMA PRINCIPAL (Refatorada para MVVM)
 // -------------------------------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelaCronograma(modifier: Modifier = Modifier) {
 
-    // ... (Estados, Contexto e Carregamento)
-    var listaCronograma by remember { mutableStateOf(emptyList<Cronograma>()) }
-    var itemSelecionado by remember { mutableStateOf<Cronograma?>(null) }
-    var showEditDialog by remember { mutableStateOf(false) }
-
+    // --- 1. Instanciação MVVM ---
     val context = LocalContext.current
     val db = AppDatabase.getDatabase(context)
     val cronogramaDao = db.cronogramaDAO()
 
+    val viewModel: CronogramaViewModel = viewModel(
+        factory = CronogramaViewModelFactory(
+            CronogramaRepository(cronogramaDao)
+        )
+    )
+
+    // Coleta o estado reativo
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // --- 2. Estados Locais da UI ---
+    var itemSelecionado by remember { mutableStateOf<Cronograma?>(null) }
+    var showEditDialog by remember { mutableStateOf(false) }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
-    fun carregarCronograma() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val listaCarregada = buscarOuCriarCronograma(cronogramaDao)
-            withContext(Dispatchers.Main) {
-                listaCronograma = listaCarregada
-            }
+    // --- 3. LaunchedEffect para Eventos de Estado ---
+    LaunchedEffect(uiState.showSnackbar) {
+        if (uiState.showSnackbar) {
+            snackbarHostState.showSnackbar(
+                message = uiState.snackbarMessage,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.onSnackbarDismiss() // Informa ao ViewModel para esconder o snackbar
         }
-    }
-
-    LaunchedEffect(Unit) {
-        carregarCronograma()
     }
 
     // --- UI PRINCIPAL ---
@@ -147,12 +122,27 @@ fun TelaCronograma(modifier: Modifier = Modifier) {
         topBar = { TopAppBar(title = { Text("Agenda Mensal") }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
+
+        // 4. Tratamento de Carregamento
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
+
+        // 5. Exibição da Lista
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            items(listaCronograma, key = { it.diaDoMes }) { dia ->
+            items(uiState.listaCronograma, key = { it.diaDoMes }) { dia ->
                 ItemDiaCronograma(
                     dia = dia,
                     onEditClick = {
@@ -170,23 +160,9 @@ fun TelaCronograma(modifier: Modifier = Modifier) {
             itemInicial = itemSelecionado!!,
             onDismiss = { showEditDialog = false },
             onSave = { itemEditado ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    atualizarCronograma(itemEditado, cronogramaDao)
 
-                    val mensagem = if (itemEditado.nome == null && itemEditado.horario == null)
-                        "Dia ${itemEditado.diaDoMes} limpo!"
-                    else
-                        "Dia ${itemEditado.diaDoMes} atualizado!"
-
-                    carregarCronograma()
-                    withContext(Dispatchers.Main) {
-                        snackbarHostState.showSnackbar(
-                            message = mensagem,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-                }
-                showEditDialog = false
+                viewModel.onSave(itemEditado)
+                showEditDialog = false // Fecha o dialog
             }
         )
     }
@@ -194,7 +170,7 @@ fun TelaCronograma(modifier: Modifier = Modifier) {
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE DIALOG DE EDIÇÃO
+// COMPOSABLE DIALOG DE EDIÇÃO (Inalterado)
 // -------------------------------------------------------------------------
 
 @Composable
@@ -207,7 +183,6 @@ fun EditarCronogramaDialog(
     var horario by remember { mutableStateOf(itemInicial.horario) }
     var descricao by remember { mutableStateOf(itemInicial.descricao) }
 
-    // Cria um item VAZIO para ser usado no botão Limpar
     val itemVazio = itemInicial.copy(nome = null, horario = null, descricao = null)
 
     AlertDialog(
@@ -215,7 +190,6 @@ fun EditarCronogramaDialog(
         title = { Text("Editar Dia ${itemInicial.diaDoMes}") },
         text = {
             Column {
-                // CAMPO NOME
                 TextField(
                     value = nome ?: "",
                     onValueChange = { nome = it },
@@ -223,7 +197,6 @@ fun EditarCronogramaDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                // CAMPO HORÁRIO
                 TextField(
                     value = horario ?: "",
                     onValueChange = { horario = it },
@@ -232,7 +205,6 @@ fun EditarCronogramaDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                // CAMPO DESCRIÇÃO
                 TextField(
                     value = descricao ?: "",
                     onValueChange = { descricao = it },
@@ -242,7 +214,6 @@ fun EditarCronogramaDialog(
                 )
             }
         },
-        // Botão de Confirmação: SALVAR
         confirmButton = {
             Button(
                 onClick = {
@@ -260,12 +231,11 @@ fun EditarCronogramaDialog(
         dismissButton = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween, // Espaçamento entre os lados
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. Botão Limpar Evento
                 TextButton(
-                    onClick = { onSave(itemVazio) }, // Salva o item com todos os campos nulos
+                    onClick = { onSave(itemVazio) },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
@@ -273,7 +243,6 @@ fun EditarCronogramaDialog(
                     Text("Limpar Evento")
                 }
 
-                // 2. Botão Cancelar
                 TextButton(onClick = onDismiss) {
                     Text("Cancelar")
                 }
