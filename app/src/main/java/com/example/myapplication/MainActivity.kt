@@ -48,7 +48,7 @@ fun AppScreen() {
 
     val navController = rememberNavController()
 
-    // 1. Defina o mapa de rotas e seus títulos
+    // 1. Define o mapa de rotas e seus títulos
     val routeToTitleMap = mapOf(
         "home" to "Home",
         "carteirinha" to "Carteirinha",

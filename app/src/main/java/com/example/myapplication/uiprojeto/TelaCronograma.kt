@@ -29,12 +29,6 @@ import androidx.compose.ui.unit.dp
 
 
 // -------------------------------------------------------------------------
-// FUNÇÕES ESTRUTURAIS REMOVIDAS:
-// As funções 'buscarOuCriarCronograma' e 'atualizarCronograma' foram movidas para o CronogramaRepository.
-// -------------------------------------------------------------------------
-
-
-// -------------------------------------------------------------------------
 // COMPOSABLE INDIVIDUAL DO CARD DO DIA
 // -------------------------------------------------------------------------
 
@@ -170,7 +164,7 @@ fun TelaCronograma(modifier: Modifier = Modifier) {
 
 
 // -------------------------------------------------------------------------
-// COMPOSABLE DIALOG DE EDIÇÃO (Inalterado)
+// COMPOSABLE DIALOG DE EDIÇÃO
 // -------------------------------------------------------------------------
 
 @Composable

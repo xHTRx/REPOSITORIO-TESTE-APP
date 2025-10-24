@@ -118,19 +118,27 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
     // ---------------------- UI ----------------------
     Scaffold(
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                val containerColor = when (data.visuals.actionLabel) {
-                    "EDIT" -> Color(0xFF1976D2) // Azul tema
-                    "DELETE" -> Color.Red
-                    "CREATE" -> Color(0xFF006400) // Verde
-                    else -> MaterialTheme.colorScheme.primary
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                SnackbarHost(snackbarHostState) { data ->
+                    val containerColor = when (data.visuals.actionLabel) {
+                        "EDIT" -> Color(0xFF1976D2) // Azul tema
+                        "DELETE" -> Color.Red
+                        "CREATE" -> Color(0xFF006400) // Verde
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = containerColor,
+                        contentColor = Color.White,
+                   )
                 }
 
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = containerColor,
-                    contentColor = Color.White
-                )
             }
         }
     ) { innerPadding ->
@@ -216,12 +224,12 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
                             Text(uiState.textoBotao)
                         }
 
-                        if (uiState.usuarioPrincipal != null && isEditing) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            TextButton(onClick = { isEditing = false }, modifier = Modifier.fillMaxWidth()) {
-                                Text("Voltar para Visualização")
-                            }
-                        }
+//                        if (uiState.usuarioPrincipal != null && isEditing) {
+//                            Spacer(modifier = Modifier.height(10.dp))
+//                            TextButton(onClick = { isEditing = false }, modifier = Modifier.fillMaxWidth()) {
+//                                Text("Voltar para Visualização")
+//                            }
+//                        }
 
                         if (uiState.usuarioPrincipal != null) {
                             Spacer(modifier = Modifier.height(10.dp))
