@@ -103,6 +103,18 @@ fun TelaCadastroUsuario(modifier: Modifier = Modifier) {
             viewModel.onSnackbarDismiss()
         }
 
+        /*
+         ______________ALTERAÇÃO DO LINCO______________
+        CoroutineScope(Dispatchers.IO).launch {
+            snackbarHostState.showSnackbar(
+                message = uiState.snackbarMessage,
+                actionLabel = uiState.snackbarAction,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.onSnackbarDismiss()
+        }
+        */
+
         // Lógica para controle do modo de edição/visualização (só após o carregamento)
         if (!uiState.isLoading) {
             if (uiState.usuarioPrincipal == null) {
